@@ -34,7 +34,7 @@ To remove the link, run `cmd /c rmdir "C:\Program Files (x86)\World of Warcraft\
 
 - [Project plan](docs/PROJECT_PLAN.md): platform facts, scope, price sources, milestones and open questions.
 - [Glossary](GLOSSARY.md): the gold-making and WoW terms used in the plan and the code.
-- [Architectural decisions](docs/adr/): price addons are optional and called only through their public APIs; the Forever client comes first.
+- [Architectural decisions](docs/adr/): price addons are optional and called only through their public APIs; the Forever client comes first; session logic is plain Lua tested with busted; a session counts loot when it arrives.
 - [Coding standards](CODING_STANDARDS.md): the checks a reviewer makes.
 - [Agent instructions](AGENTS.md): repository instructions for coding agents. [CLAUDE.md](CLAUDE.md) imports them. The issue-tracker, triage-label, domain and pull-request conventions are in [docs/agents/](docs/agents/).
 
