@@ -31,6 +31,10 @@ Kezan targets World of Warcraft: Forever (patch 1.60.1, `## Interface: 16001`), 
 
 Nothing here can be run outside the game client. A change that touches game behaviour states in its pull request what was checked in game and on which build.
 
+### Milestone 1: in-game checks deferred
+
+Agents implement milestone 1 (spec #3) without the owner checking each ticket in game. A pull request for a milestone 1 ticket lists that ticket's in-game checks as pending, and merges once its automated checks pass. The owner runs every deferred check in the verification pass (#16) after the last ticket merges. Never record an in-game result as confirmed unless the owner reports it. This section ends when #16 closes.
+
 ## Price addons
 
 Auctionator and TradeSkillMaster are optional dependencies. Call only their public APIs (`Auctionator.API.v1.*`, `TSM_API.*`), check that the addon is loaded first, and never copy their code into this repository: both are All Rights Reserved.
