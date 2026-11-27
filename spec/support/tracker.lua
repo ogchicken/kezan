@@ -4,12 +4,16 @@
 local support = {}
 
 -- The enUS values of the client's own loot and coin format strings on
--- Forever (research/2026-11-27-loot-and-money-events.md, section 3).
+-- Forever (research/2026-11-27-loot-and-money-events.md, section 3; the
+-- two _GUILD forms from the enUS GlobalStrings of Forever build 70938 in
+-- Ketho/BlizzardInterfaceResources).
 support.enUSLootStrings = {
   LOOT_ITEM_SELF = "You receive loot: %s",
   LOOT_ITEM_SELF_MULTIPLE = "You receive loot: %sx%d",
   YOU_LOOT_MONEY = "You loot %s",
+  YOU_LOOT_MONEY_GUILD = "You loot %s (%s deposited to guild bank)",
   LOOT_MONEY_SPLIT = "Your share of the loot is %s.",
+  LOOT_MONEY_SPLIT_GUILD = "Your share of the loot is %s. (%s deposited to guild bank)",
   GOLD_AMOUNT = "%d Gold",
   SILVER_AMOUNT = "%d Silver",
   COPPER_AMOUNT = "%d Copper",

@@ -33,6 +33,7 @@ stds.wow = {
     "LOOT_ITEM_SELF",
     "LOOT_ITEM_SELF_MULTIPLE",
     "LOOT_MONEY_SPLIT",
+    "LOOT_MONEY_SPLIT_GUILD",
     "NUM_TOTAL_EQUIPPED_BAG_SLOTS",
     "Settings",
     "SILVER_AMOUNT",
@@ -40,6 +41,7 @@ stds.wow = {
     "UIParent",
     "UnitName",
     "YOU_LOOT_MONEY",
+    "YOU_LOOT_MONEY_GUILD",
     SlashCmdList = { fields = { KEZAN = { read_only = false } } },
   },
 }
