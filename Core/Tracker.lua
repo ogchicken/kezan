@@ -75,7 +75,10 @@ end
 -- Commands return a true value on success, or nil and a reason the slash
 -- command can print.
 function Tracker:start()
-  if self:currentSession() then
+  local current = self:currentSession()
+  if current and current.state == "paused" then
+    return nil, "A session is already paused. Resume or stop it first."
+  elseif current then
     return nil, "A session is already running."
   end
   local now = self.ports.clock.now()
@@ -90,6 +93,32 @@ function Tracker:start()
   return true
 end
 
+-- Pausing adds the current run to the accumulated seconds.
+function Tracker:pause()
+  local session = self:currentSession()
+  if not session then
+    return nil, "There is no session to pause."
+  elseif session.state == "paused" then
+    return nil, "The session is already paused."
+  end
+  local now = self.ports.clock.now()
+  session.accumulatedSeconds = activeTime(session, now)
+  session.state = "paused"
+  return true
+end
+
+function Tracker:resume()
+  local session = self:currentSession()
+  if not session then
+    return nil, "There is no session to resume."
+  elseif session.state == "running" then
+    return nil, "The session is already running."
+  end
+  session.runStartedAt = self.ports.clock.now()
+  session.state = "running"
+  return true
+end
+
 -- Returns the stopped session's figures.
 function Tracker:stop()
   local session = self:currentSession()
@@ -99,6 +128,36 @@ function Tracker:stop()
   local figures = figuresOf(session, self.ports.clock.now())
   self:setCurrentSession(nil)
   return figures
+end
+
+-- A notice that the game is unloading, just before the client writes the
+-- saved variables. The current session records the time as its last save.
+function Tracker:gameUnloading()
+  local session = self:currentSession()
+  if session then
+    session.lastSavedAt = self.ports.clock.now()
+  end
+end
+
+-- A notice that the game loaded. kind: "reload" (a UI reload) or "login"
+-- (an initial login). A running session's run ends at its last save: the
+-- time since was spent in a loading screen or logged out, so it never
+-- counts. After a reload a new run starts now; after a login the session
+-- is paused. A paused session is left as it is.
+function Tracker:gameLoaded(kind)
+  local session = self:runningSession()
+  if not session then
+    return
+  end
+  local savedAt = session.lastSavedAt or session.runStartedAt
+  session.accumulatedSeconds = session.accumulatedSeconds
+    + math.max(0, savedAt - session.runStartedAt)
+  session.lastSavedAt = nil
+  if kind == "reload" then
+    session.runStartedAt = self.ports.clock.now()
+  else
+    session.state = "paused"
+  end
 end
 
 -- kind: "coin" (CHAT_MSG_MONEY) or "loot" (CHAT_MSG_LOOT); text: the raw
