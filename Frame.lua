@@ -35,11 +35,11 @@ local BUTTON_LABELS = {
 
 -- The figures shown, one row each, top to bottom.
 local ROWS = {
-  { key = "activeTime", label = "Active time", format = ns.duration },
-  { key = "rawGold", label = "Raw gold", format = ns.money },
-  { key = "lootedItemValue", label = "Item value", format = ns.money },
-  { key = "total", label = "Total", format = ns.money },
-  { key = "gph", label = "Per hour", format = ns.money },
+  { key = "activeTime", label = "Active time", format = ns.activeTimeText },
+  { key = "rawGold", label = "Raw gold", format = GetMoneyString },
+  { key = "lootedItemValue", label = "Looted item value", format = GetMoneyString },
+  { key = "total", label = "Total", format = GetMoneyString },
+  { key = "gph", label = "Per hour", format = GetMoneyString },
 }
 
 -- KezanDB.frame: { shown, point, relativePoint, x, y }. An optional table,

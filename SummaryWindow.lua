@@ -8,7 +8,7 @@ local _, ns = ...
 
 local PADDING = 12
 local ROW_HEIGHT = 16
-local LABEL_WIDTH = 90
+local LABEL_WIDTH = 110
 
 -- The item columns, left to right: key in a top item, heading, width,
 -- justification.
@@ -43,18 +43,18 @@ local FIELDS = {
   { label = "Character", format = function(s) return s.character end },
   { label = "Start zone", format = function(s) return s.startZone or "Unknown" end },
   { label = "Started", format = function(s) return startTime(s.startedAt) end },
-  { label = "Active time", format = function(s) return ns.duration(s.activeTime) end },
-  { label = "Raw gold", format = function(s) return ns.money(s.rawGold) end },
-  { label = "Item value", format = function(s) return ns.money(s.lootedItemValue) end },
-  { label = "Total", format = function(s) return ns.money(s.total) end },
-  { label = "Per hour", format = function(s) return ns.money(s.gph) end },
+  { label = "Active time", format = function(s) return ns.activeTimeText(s.activeTime) end },
+  { label = "Raw gold", format = function(s) return GetMoneyString(s.rawGold) end },
+  { label = "Looted item value", format = function(s) return GetMoneyString(s.lootedItemValue) end },
+  { label = "Total", format = function(s) return GetMoneyString(s.total) end },
+  { label = "Per hour", format = function(s) return GetMoneyString(s.gph) end },
 }
 
 local CELL_FORMATS = {
   link = function(item) return item.link end,
   quantity = function(item) return tostring(item.quantity) end,
-  itemValue = function(item) return ns.money(item.itemValue) end,
-  value = function(item) return ns.money(item.value) end,
+  itemValue = function(item) return GetMoneyString(item.itemValue) end,
+  value = function(item) return GetMoneyString(item.value) end,
   pricing = function(item) return PRICING[item.pricing].text end,
 }
 
