@@ -21,3 +21,4 @@ AuctionatorPrices.lua
 OpenedItems.lua
 Commands.lua
 Frame.lua
+SummaryWindow.lua

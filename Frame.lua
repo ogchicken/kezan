@@ -105,7 +105,7 @@ local function onButton(name)
     confirmingStop = true
   elseif name == "confirmStop" then
     confirmingStop = false
-    ns.sessionCommands.stop()
+    ns.stopSessionAndShowSummary()
   elseif name == "cancelStop" then
     confirmingStop = false
   else
