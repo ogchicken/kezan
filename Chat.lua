@@ -4,9 +4,7 @@
 
 local _, ns = ...
 
-local function isSecret(value)
-  return issecretvalue ~= nil and issecretvalue(value)
-end
+local isSecret = ns.isSecret
 
 -- A handler for a chat event whose text is a line of the given kind
 -- ("coin" or "loot").

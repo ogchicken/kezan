@@ -13,6 +13,13 @@ function ns.print(message)
   print("|cffd4af37Kezan|r " .. message)
 end
 
+-- Whether a value from the game arrived secret, so it can't be read or
+-- compared (research/2026-11-27-loot-and-money-events.md). A client
+-- without secret values has none.
+function ns.isSecret(value)
+  return issecretvalue ~= nil and issecretvalue(value)
+end
+
 -- Events. ns.on(event, handler) registers the event on first use and calls
 -- each handler with the event's payload. Register only events seen to fire
 -- on Forever (CODING_STANDARDS.md).

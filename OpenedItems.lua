@@ -10,9 +10,7 @@
 
 local _, ns = ...
 
-local function isSecret(value)
-  return issecretvalue ~= nil and issecretvalue(value)
-end
+local isSecret = ns.isSecret
 
 -- Item ID by GUID of every item seen in the bags since the UI loaded. An
 -- entry is never removed: a GUID names one item for good, and the map must

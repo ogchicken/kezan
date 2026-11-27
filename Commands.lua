@@ -34,7 +34,7 @@ end
 local function currentZone()
   for _, read in ipairs({ GetRealZoneText, GetZoneText }) do
     local zone = read()
-    if zone ~= nil and not (issecretvalue ~= nil and issecretvalue(zone)) and zone ~= "" then
+    if zone ~= nil and not ns.isSecret(zone) and zone ~= "" then
       return zone
     end
   end
