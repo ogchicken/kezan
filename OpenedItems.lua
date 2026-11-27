@@ -6,7 +6,8 @@
 -- The window's own loot source names the item: a source GUID starting
 -- "Item-" marks an opened item. The GUID is turned into an item ID through
 -- a map of bag item GUIDs, with C_Item.GetItemIDByGUID as a second try. A
--- read-only hook on using a container item is the fallback.
+-- read-only hook on using a container item, and the Disenchant spellcast,
+-- are the fallback.
 
 local _, ns = ...
 
@@ -35,27 +36,57 @@ end
 ns.on("PLAYER_ENTERING_WORLD", scanBags)
 ns.on("BAG_UPDATE_DELAYED", scanBags)
 
--- Fallback: the last container item used that holds loot, from a hook that
--- runs after C_Container.UseContainerItem. It only reads: a hook that calls
--- anything protected is blocked (ADDON_ACTION_FORBIDDEN).
+-- Fallbacks, when the window's source can't be read: the last container
+-- item used that holds loot, or the last item disenchanted. Both come from
+-- a hook that runs after C_Container.UseContainerItem, which the bags call
+-- on a right-click and, while Disenchant waits for its target, on the
+-- left-click that picks it (research note, section 2). The hook only
+-- reads: one that calls anything protected is blocked
+-- (ADDON_ACTION_FORBIDDEN).
 local USE_WINDOW_SECONDS = 5
-local lastUse -- { itemID = <n>, at = GetTime() }
+-- Disenchant's cast follows the click that picks its item.
+local CAST_WINDOW_SECONDS = 10
+local DISENCHANT_SPELL_ID = 13262
+
+local lastOpen -- the item a loot window should come from: { itemID, at }
+local lastTarget -- the last item used that holds no loot: { itemID, at }
 
 hooksecurefunc(C_Container, "UseContainerItem", function(bag, slot)
   if isSecret(bag) or isSecret(slot) then
     return
   end
   local info = C_Container.GetContainerItemInfo(bag, slot)
-  if info and not isSecret(info.hasLoot) and not isSecret(info.itemID) and info.hasLoot then
-    lastUse = { itemID = info.itemID, at = GetTime() }
+  if not info or isSecret(info.hasLoot) or isSecret(info.itemID) then
+    return
+  end
+  local use = { itemID = info.itemID, at = GetTime() }
+  if info.hasLoot then
+    lastOpen = use
+  else
+    -- Only a Disenchant cast tells that this use opens a loot window.
+    lastTarget = use
   end
 end)
 
--- The item ID of a container item used in the last few seconds, or nil.
--- Taken once, so that it names one window at most.
+-- The player's Disenchant succeeded: the item picked just before is the
+-- one whose window opens next. The cast alone can't tell which item it was.
+ns.on("UNIT_SPELLCAST_SUCCEEDED", function(unit, _, spellID)
+  if isSecret(unit) or isSecret(spellID) or unit ~= "player" or spellID ~= DISENCHANT_SPELL_ID then
+    return
+  end
+  local target = lastTarget
+  lastTarget = nil
+  if target and GetTime() - target.at <= CAST_WINDOW_SECONDS then
+    lastOpen = { itemID = target.itemID, at = GetTime() }
+  end
+end)
+
+-- The item ID of a container item used, or an item disenchanted, in the
+-- last few seconds, or nil. Taken once, so that it names one window at
+-- most.
 local function takeRecentUse()
-  local use = lastUse
-  lastUse = nil
+  local use = lastOpen
+  lastOpen = nil
   if use and GetTime() - use.at <= USE_WINDOW_SECONDS then
     return use.itemID
   end
