@@ -64,6 +64,7 @@ ns.on("ADDON_LOADED", function(loadedName)
   ns.db = KezanDB
   ns.tracker = ns.Tracker.new({
     clock = clock,
+    itemFacts = ns.itemFacts, -- ItemFacts.lua, loaded before ADDON_LOADED fires
     lootStrings = lootStrings,
     savedState = KezanDB,
     character = characterKey(),

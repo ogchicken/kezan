@@ -11,6 +11,7 @@ stds.wow = {
   },
   read_globals = {
     "C_AddOns",
+    "C_Item",
     "COPPER_AMOUNT",
     "CreateFrame",
     "GetMoneyString",

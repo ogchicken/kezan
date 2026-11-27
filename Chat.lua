@@ -25,3 +25,4 @@ local function chatAdapter(kind)
 end
 
 ns.on("CHAT_MSG_MONEY", chatAdapter("coin"))
+ns.on("CHAT_MSG_LOOT", chatAdapter("loot"))

@@ -24,6 +24,7 @@ ns.addCommand("stop", "stop the session and print what it earned", function()
     ns.print(reason)
     return
   end
-  ns.print(("Session stopped. Raw gold %s in %s of active time: %s per hour."):format(
-    money(stopped.rawGold), duration(stopped.activeTime), money(stopped.gph)))
+  ns.print(("Session stopped after %s of active time."):format(duration(stopped.activeTime)))
+  print(("  Raw gold %s, looted item value %s, total %s: %s per hour."):format(
+    money(stopped.rawGold), money(stopped.lootedItemValue), money(stopped.total), money(stopped.gph)))
 end)

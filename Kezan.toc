@@ -14,4 +14,5 @@ Core\Items.lua
 Core\Tracker.lua
 Kezan.lua
 Chat.lua
+ItemFacts.lua
 Commands.lua
