@@ -67,9 +67,13 @@ function support.fakeItemFacts(factsByLink)
 end
 
 -- Price source port: `ahValue(itemLink)` returns the AH value in copper or
--- nil, then its age in whole days or nil when unknown.
--- `set(itemLink, copper, ageDays)` changes a price.
-function support.fakePriceSource(pricesByLink)
+-- nil, then its age in whole days or nil when unknown, then
+-- `ageUnsupported`: true when the source can't tell any price's age (as
+-- when Auctionator's age call is missing or fails), so nothing is stale.
+-- `set(itemLink, copper, ageDays)` changes a price. Options:
+-- `withoutAges = true` makes a source that can't tell ages.
+function support.fakePriceSource(pricesByLink, options)
+  local withoutAges = options and options.withoutAges or false
   local prices = {}
   for link, price in pairs(pricesByLink or {}) do
     prices[link] = price
@@ -77,6 +81,9 @@ function support.fakePriceSource(pricesByLink)
   local priceSource = {}
   function priceSource.ahValue(itemLink)
     local price = prices[itemLink]
+    if withoutAges then
+      return price and price.copper, nil, true
+    end
     if price then
       return price.copper, price.ageDays
     end
@@ -89,7 +96,10 @@ function support.fakePriceSource(pricesByLink)
 end
 
 -- Builds a tracker. Any port left out of `ports` gets a fake: the clock at
--- 0, no item facts, no prices, the enUS loot strings. Options left out get
+-- 0, no item facts, the enUS loot strings, and Auctionator loaded with no
+-- prices. `priceSource = <port>` is short for
+-- `priceSources = { auctionator = <port> }`; pass `priceSources = {}` for
+-- no price addon loaded. Options left out get
 -- an empty saved state and the character "Farmer-Realm"; pass one
 -- `savedState` to two trackers to see what a later tracker finds. Returns
 -- the tracker and the ports it was built with.
@@ -99,7 +109,7 @@ function support.newTracker(ports)
   local built = {
     clock = ports.clock or support.fakeClock(0),
     itemFacts = ports.itemFacts or support.fakeItemFacts(),
-    priceSource = ports.priceSource or support.fakePriceSource(),
+    priceSources = ports.priceSources or { auctionator = ports.priceSource or support.fakePriceSource() },
     lootStrings = ports.lootStrings or support.enUSLootStrings,
     savedState = ports.savedState or {},
     character = ports.character or "Farmer-Realm",

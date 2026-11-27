@@ -65,6 +65,11 @@ ns.on("ADDON_LOADED", function(loadedName)
   ns.tracker = ns.Tracker.new({
     clock = clock,
     itemFacts = ns.itemFacts, -- ItemFacts.lua, loaded before ADDON_LOADED fires
+    -- AuctionatorPrices.lua. Auctionator is an optional dependency, so when
+    -- it is enabled it has loaded before Kezan's ADDON_LOADED.
+    priceSources = {
+      auctionator = ns.auctionatorPrices.isLoaded() and ns.auctionatorPrices or nil,
+    },
     lootStrings = lootStrings,
     savedState = KezanDB,
     character = characterKey(),

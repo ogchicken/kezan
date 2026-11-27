@@ -16,4 +16,5 @@ Kezan.lua
 Lifecycle.lua
 Chat.lua
 ItemFacts.lua
+AuctionatorPrices.lua
 Commands.lua

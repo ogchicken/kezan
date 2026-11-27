@@ -5,7 +5,7 @@
 -- session.items[itemLink] = {
 --   quantity = <n>,          -- every drop of the item added up
 --   itemValue = <copper>,    -- per unit, from the last valuation
---   pricing = "vendor" | "unpriced",
+--   pricing = "ah" | "stale" | "vendor" | "unpriced",
 -- }
 
 local _, ns = ...
@@ -14,7 +14,8 @@ local Items = {}
 
 -- Gives one item its item value from the ports.
 local function value(entry, link, ports)
-  entry.itemValue, entry.pricing = ns.Valuation.itemValue(ports.itemFacts.lookup(link))
+  entry.itemValue, entry.pricing =
+    ns.Valuation.itemValue(link, ports.itemFacts.lookup(link), ports.priceSource)
 end
 
 -- Adds a drop of `quantity` units of the item to the session, and values
