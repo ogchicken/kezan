@@ -99,6 +99,17 @@ local function activeTime(session, now)
   return seconds
 end
 
+-- What frameFigures reads when there is no current session, so that every
+-- figure is 0. Never stored, and never changed.
+local NO_SESSION_RECORD = {
+  state = NO_SESSION,
+  accumulatedSeconds = 0,
+  rawGold = 0,
+  unreadableLines = 0,
+}
+
+-- The figures of a session at `now`. Each of them is also kept in the
+-- history at stop (see Core/Summary.lua), except `state`.
 local function figuresOf(session, now)
   local seconds = activeTime(session, now)
   local lootedItemValue = ns.Items.lootedItemValue(session)
@@ -308,19 +319,7 @@ local COMMANDS = {
 -- The figures the frame shows, with `commands`: the commands that apply
 -- now (see COMMANDS). Read after refresh, so that item values are current.
 function Tracker:frameFigures()
-  local session = self:currentSession()
-  if not session then
-    return {
-      state = NO_SESSION,
-      activeTime = 0,
-      rawGold = 0,
-      lootedItemValue = 0,
-      total = 0,
-      gph = 0,
-      unreadableLines = 0,
-      commands = COMMANDS[NO_SESSION],
-    }
-  end
+  local session = self:currentSession() or NO_SESSION_RECORD
   local figures = figuresOf(session, self.ports.clock.now())
   figures.commands = COMMANDS[session.state]
   return figures
