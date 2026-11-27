@@ -31,6 +31,10 @@ end
 function LootLines.new(strings)
   local reader = setmetatable({}, LootLines)
   reader.ownCoin = patternFor(strings.YOU_LOOT_MONEY)
+  -- The multiple form is tried first: the single form's `(.-)` would take
+  -- "[Peacebloom]x3" whole as the link.
+  reader.ownItemMultiple = patternFor(strings.LOOT_ITEM_SELF_MULTIPLE)
+  reader.ownItem = patternFor(strings.LOOT_ITEM_SELF)
   reader.coinUnits = {
     { pattern = patternFor(strings.GOLD_AMOUNT, false), copper = 10000 },
     { pattern = patternFor(strings.SILVER_AMOUNT, false), copper = 100 },
@@ -59,6 +63,20 @@ function LootLines:ownCoinCopper(text)
     return nil
   end
   return self:copperIn(moneyText)
+end
+
+-- Reads an item line. Returns the item link and the quantity of the
+-- player's own drop, or nil when the line is not a "You receive loot" line.
+function LootLines:ownDrop(text)
+  local link, quantity = text:match(self.ownItemMultiple)
+  if link then
+    return link, tonumber(quantity)
+  end
+  link = text:match(self.ownItem)
+  if not link then
+    return nil
+  end
+  return link, 1
 end
 
 ns.LootLines = LootLines

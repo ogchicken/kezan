@@ -55,7 +55,7 @@ end
 
 local function figuresOf(session, now)
   local seconds = activeTime(session, now)
-  local lootedItemValue = 0
+  local lootedItemValue = ns.Items.lootedItemValue(session)
   local total = session.rawGold + lootedItemValue
   local gph = 0
   if seconds > 0 then
@@ -90,13 +90,16 @@ function Tracker:start()
   return true
 end
 
--- Returns the stopped session's figures.
+-- Returns the stopped session's figures, with `items`: its looted items
+-- by item link, each { quantity, itemValue, pricing }.
 function Tracker:stop()
   local session = self:currentSession()
   if not session then
     return nil, "There is no session to stop."
   end
+  ns.Items.refresh(session, self.ports)
   local figures = figuresOf(session, self.ports.clock.now())
+  figures.items = session.items or {}
   self:setCurrentSession(nil)
   return figures
 end
@@ -113,6 +116,11 @@ function Tracker:chatLine(kind, text)
     if copper then
       session.rawGold = session.rawGold + copper
     end
+  elseif kind == "loot" then
+    local link, quantity = self.lines:ownDrop(text)
+    if link then
+      ns.Items.add(session, link, quantity, self.ports)
+    end
   end
 end
 
@@ -122,6 +130,16 @@ function Tracker:unreadableLine()
   local session = self:runningSession()
   if session then
     session.unreadableLines = session.unreadableLines + 1
+  end
+end
+
+-- Re-values every item of the current session from the ports: item facts
+-- that have loaded since, and prices that have changed. Called by the frame
+-- and when late item info arrives.
+function Tracker:refresh()
+  local session = self:currentSession()
+  if session then
+    ns.Items.refresh(session, self.ports)
   end
 end
 
