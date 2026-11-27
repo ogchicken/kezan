@@ -40,6 +40,26 @@ describe("items looted during a session", function()
     assert.are.same({ [PEACEBLOOM] = { quantity = 6, itemValue = 5, pricing = "vendor" } }, stopped.items)
   end)
 
+  it("keeps one entry for an item looted before and after a level-up", function()
+    local atLevel59 = support.itemLink(2447, "Peacebloom", nil, 59)
+    local atLevel60 = support.itemLink(2447, "Peacebloom", nil, 60)
+    local tracker = support.newTracker({
+      itemFacts = support.fakeItemFacts({
+        [atLevel59] = { itemID = 2447, quality = 1, soulbound = false, vendorValue = 5 },
+        [atLevel60] = { itemID = 2447, quality = 1, soulbound = false, vendorValue = 5 },
+      }),
+    })
+    tracker:start()
+    tracker:chatLine("loot", "You receive loot: " .. atLevel59 .. "x2")
+    tracker:chatLine("loot", "You receive loot: " .. atLevel60)
+
+    local stopped = tracker:stop()
+
+    assert.are.equal(15, stopped.lootedItemValue)
+    assert.are.same({ [atLevel59] = { quantity = 3, itemValue = 5, pricing = "vendor" } }, stopped.items)
+    assert.are.equal(1, #stopped.topItems)
+  end)
+
   local counted = {
     { "You receive loot: " .. PEACEBLOOM, 1 },
     { "You receive loot: " .. PEACEBLOOM .. ".", 1 },

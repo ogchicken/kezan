@@ -21,9 +21,11 @@ support.enUSLootStrings = {
 
 -- An item link as the client puts it in a chat line, such as
 -- "|cffffffff|Hitem:2447::::::::60:::::::::|h[Peacebloom]|h|r". `color`
--- is the quality colour without "|c"; white when left out.
-function support.itemLink(itemID, name, color)
-  return ("|c%s|Hitem:%d::::::::60:::::::::|h[%s]|h|r"):format(color or "ffffffff", itemID, name)
+-- is the quality colour without "|c"; white when left out. `level` is the
+-- looting player's level, which the client writes into the link; 60 when
+-- left out.
+function support.itemLink(itemID, name, color, level)
+  return ("|c%s|Hitem:%d::::::::%d:::::::::|h[%s]|h|r"):format(color or "ffffffff", itemID, level or 60, name)
 end
 
 -- Loads every session-core file listed in Kezan.toc, in TOC order, into a
