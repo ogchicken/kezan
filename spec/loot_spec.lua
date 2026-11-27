@@ -195,3 +195,22 @@ describe("the value of looted items with no price source", function()
     assert.are.equal("none", tracker:frameFigures().state)
   end)
 end)
+
+describe("items looted while paused", function()
+  it("do not count, and items looted before the pause keep their value", function()
+    local itemFacts = support.fakeItemFacts({
+      [LINEN] = { itemID = 2589, quality = 1, soulbound = false, vendorValue = 13 },
+    })
+    local tracker = support.newTracker({ itemFacts = itemFacts })
+    tracker:start()
+    tracker:chatLine("loot", "You receive loot: " .. LINEN .. "x2")
+    tracker:pause()
+    tracker:chatLine("loot", "You receive loot: " .. LINEN .. "x5")
+    tracker:refresh()
+
+    assert.are.equal(26, tracker:frameFigures().lootedItemValue)
+    tracker:resume()
+    tracker:chatLine("loot", "You receive loot: " .. LINEN)
+    assert.are.equal(3, tracker:stop().items[LINEN].quantity)
+  end)
+end)
