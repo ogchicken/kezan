@@ -11,5 +11,6 @@
 Core\LootLines.lua
 Core\Tracker.lua
 Kezan.lua
+Lifecycle.lua
 Chat.lua
 Commands.lua
