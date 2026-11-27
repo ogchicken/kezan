@@ -241,6 +241,16 @@ function Tracker:refresh()
   end
 end
 
+-- The commands that apply in each state, in the order the frame shows
+-- their buttons. Each is the name of a tracker method.
+local COMMANDS = {
+  none = { "start" },
+  running = { "pause", "stop" },
+  paused = { "resume", "stop" },
+}
+
+-- The figures the frame shows, with `commands`: the commands that apply
+-- now (see COMMANDS). Read after refresh, so that item values are current.
 function Tracker:frameFigures()
   local session = self:currentSession()
   if not session then
@@ -252,9 +262,12 @@ function Tracker:frameFigures()
       total = 0,
       gph = 0,
       unreadableLines = 0,
+      commands = COMMANDS.none,
     }
   end
-  return figuresOf(session, self.ports.clock.now())
+  local figures = figuresOf(session, self.ports.clock.now())
+  figures.commands = COMMANDS[session.state]
+  return figures
 end
 
 ns.Tracker = Tracker

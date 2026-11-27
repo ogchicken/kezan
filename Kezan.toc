@@ -18,3 +18,4 @@ Chat.lua
 ItemFacts.lua
 AuctionatorPrices.lua
 Commands.lua
+Frame.lua
