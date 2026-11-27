@@ -16,4 +16,5 @@ Kezan.lua
 Lifecycle.lua
 Chat.lua
 ItemFacts.lua
+OpenedItems.lua
 Commands.lua
