@@ -27,15 +27,15 @@ Kezan's position: open source (MIT) from day one, modular, and farmer-first. Sou
 
 ## 4. Price sources
 
-In order of preference, chosen per player in settings:
+A price source gives an item's AH value, or none, and how many days old that value is, or unknown. The player chooses one in settings:
 
-1. **Auctionator** (`Auctionator.API.v1`): `GetAuctionPriceByItemLink(callerID, itemLink)` and `GetAuctionPriceByItemID(callerID, itemID)` return copper or nil; `GetAuctionAge*` says how old the price is; `RegisterForDBUpdate(callerID, fn)` signals a finished scan, after which cached values are refreshed.
+1. **Auctionator** (`Auctionator.API.v1`): `GetAuctionPriceByItemLink(callerID, itemLink)` and `GetAuctionPriceByItemID(callerID, itemID)` return the last minimum buyout seen, in copper, or nil. These two (and `MultiSearch`) are the only functions Auctionator's README supports; it says the others may break without warning. Kezan also calls the undocumented `GetAuctionAgeByItemLink` (whole days since the item was last seen, nil when never seen or older than the price history, 21 days by default) to mark stale prices, guarded so that Kezan works without it. It does not rely on `RegisterForDBUpdate`: item values are re-read at every display refresh. Read from Auctionator version 354 as installed in the Forever client on 27 November 2026; its GitHub repository returned 404 that day.
 2. **TradeSkillMaster** (`TSM_API`): `GetCustomPriceValue(priceString, itemString)` with `ToItemString(itemLink)`; the player chooses the price string (for example `DBMarket`). Which TSM sources are populated on Forever is not yet verified.
-3. **Vendor**: `sellPrice` from `C_Item.GetItemInfo`. Always available.
+3. **None**: vendor values only.
 
-An item with no AH value falls back to the next source and is marked as such in the display. Both price addons are optional (ADR 0001). TSM's public data terms ask for credit and a link when its prices are shown.
+The vendor value (`sellPrice` from `C_Item.GetItemInfo`) is not a price source but a fact about the item, always available. Item value follows fixed rules (see `GLOSSARY.md`): poor-quality and soulbound items take their vendor value; tradable items take their AH value, or the vendor value when the AH value is missing, marked as such in the display. Both price addons are optional (ADR 0001). TSM's public data terms ask for credit and a link when its prices are shown.
 
-Milestone 1 supports Auctionator and the vendor price; TradeSkillMaster follows later. Decided on 27 November 2026: the owner plays with Auctionator, so it is the source that can be tested in game, and which TSM price sources hold data on Forever is still unverified (section 6). The price lookup keeps each source behind one interface, so TSM arrives as one more source rather than a rewrite.
+Milestone 1 supports Auctionator and None; TradeSkillMaster follows later. When Auctionator is not loaded, the setting shows None and says why. Decided on 27 November 2026: the owner plays with Auctionator, so it is the source that can be tested in game, and which TSM price sources hold data on Forever is still unverified (section 6). Every price source answers the same question, so TSM arrives as one more source rather than a rewrite.
 
 ## 5. Milestones
 
@@ -48,18 +48,19 @@ Milestone 1 supports Auctionator and the vendor price; TradeSkillMaster follows 
 | Looted items | Every looted item and quantity is recorded from the loot events, including items whose info loads late. |
 | Price lookup | Values come from Auctionator with the vendor price as fallback; a missing Auctionator causes no Lua error. |
 | GPH display | A small movable frame shows duration, raw gold, item value, total and gold per hour, updating at least every 5 seconds. |
-| Session summary | On stop, a summary lists the top items by value; the last sessions are kept in `KezanDB`. |
+| Session summary | On stop, a summary lists the top items by value; every session is kept in `KezanDB`, totalled per item. |
 | Settings | A `Settings` panel chooses the price source and toggles the frame. |
 
 ### Later (unordered)
 
-TradeSkillMaster as a price source, with a chosen price string; session history and per-zone comparison; a LibDataBroker feed; tooltip values; vendor-trash auto-sell; mail and AH sales accounting; profit tracking across characters; crafting and flipping helpers.
+TradeSkillMaster as a price source, with a chosen price string; session history and per-zone comparison; a LibDataBroker feed; tooltip values; vendor-trash auto-sell; spending and net gold per hour (repairs, reagents, consumables); an opt-in setting to show gold per hour without the session's most valuable drop; mail and AH sales accounting; profit tracking across characters; crafting and flipping helpers.
 
 ## 6. Open questions
 
-Desk research of 27 November 2026 (`research/2026-11-27-loot-and-money-events.md`) answered these on paper from Blizzard's generated API documentation for the Forever build and from shipped Forever addons. Each still needs a check in the live client before the ticket that depends on it; the note's last section lists the checks.
+Desk research of 27 November 2026 (`research/2026-11-27-loot-and-money-events.md` and `research/2026-11-27-opened-items-reload-and-zone.md`) answered these on paper from Blizzard's generated API documentation for the Forever build and from shipped Forever addons. Each still needs a check in the live client before the ticket that depends on it; the note's last section lists the checks.
 
 1. **Loot and money data: answered on paper, confirm in game.** Forever's API documentation makes `CHAT_MSG_SYSTEM` and 46 other chat events secret in dungeons, raids, encounters, keystones and PvP matches, but not `CHAT_MSG_LOOT` or `CHAT_MSG_MONEY`; `GetMoney()`, `PLAYER_MONEY` and the `LOOT_*` events carry no secret tag. To confirm in game, solo and in a group dungeon: the text arrives readable; its exact wording; which payload fields, if any, name the looter; whether a won roll gives one "You receive loot" line or two; and that nothing changes with the `addon*RestrictionsForced` CVars set. If the chat events turn out secret after all, the fallback is diffing `GetMoney()` and bag contents. Quest money arrives on `CHAT_MSG_SYSTEM`, so it is secret in dungeons either way.
-2. **Plain TOC: answered.** A single `Kezan.toc` with `## Interface: 16001` loads on Forever without an "out of date" warning; ForeverPlusPlus confirmed it in the live client and most Forever addons ship that way. Confirm when Kezan first loads in game.
+2. **Plain TOC: confirmed in game.** A single `Kezan.toc` with `## Interface: 16001` loads on Forever without an "out of date" warning; ForeverPlusPlus confirmed it in the live client and most Forever addons ship that way. Checked on 27 November 2026: Kezan's plain TOC loads on the live Forever client with no warning, and `/kezan` prints the version.
 3. **TSM price sources: open, deferred with TSM support.** TSM publishes region data for Forever (US and EU); whether the realm sources (`DBMarket`, `DBMinBuyout`, `DBHistorical`, `DBRecent`) hold values is unverified. Check before TSM support is built.
 4. **`/kz`: answered, low risk.** No Blizzard command and no Forever addon found uses it; `/kezan` stays registered as well. Check `SlashCmdList` with popular addons loaded.
+5. **Opened items: answered from addon evidence, disenchant checks open.** Desk research of 27 November 2026 (`research/2026-11-27-opened-items-reload-and-zone.md`): on Forever, disenchanting opens a loot window and its materials arrive as "You receive loot", per traces recorded by Forever addon authors; on `LOOT_READY`, `GetLootSourceInfo` names the opened item's `Item-` GUID, which Kezan maps to an item ID from the bags (ADR 0004, opened items). The owner has no character with Enchanting, so the note's disenchant checks (1 to 4) stay open and block no ticket; if the opened item can't be identified, ADR 0004's fallback applies. Its other checks (5 to 10: containers, the use hook, login and reload events, zone calls) go in the in-game probe.
