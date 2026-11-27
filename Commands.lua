@@ -4,19 +4,6 @@
 
 local _, ns = ...
 
-local function money(copper)
-  return GetMoneyString(copper)
-end
-
-local function duration(seconds)
-  local hours = math.floor(seconds / 3600)
-  local minutes = math.floor(seconds % 3600 / 60)
-  return ("%d:%02d:%02d"):format(hours, minutes, seconds % 60)
-end
-
-ns.money = money
-ns.duration = duration
-
 -- ns.sessionCommands[name](), name as in the tracker's frame figures
 -- (`commands`): runs the command, prints what happened and returns true,
 -- or prints the tracker's reason and returns nil.
@@ -27,22 +14,8 @@ local function sessionCommand(name, summary, run)
   ns.addCommand(name, summary, run)
 end
 
--- The zone the player is in, for the session's start zone: the map
--- instance name (inside an instance, the instance), else the zone text
--- (research/2026-11-27-opened-items-reload-and-zone.md, section 4). Nil
--- when neither can be read.
-local function currentZone()
-  for _, read in ipairs({ GetRealZoneText, GetZoneText }) do
-    local zone = read()
-    if zone ~= nil and not (issecretvalue ~= nil and issecretvalue(zone)) and zone ~= "" then
-      return zone
-    end
-  end
-  return nil
-end
-
 sessionCommand("start", "start a session", function()
-  local ok, reason = ns.tracker:start(currentZone())
+  local ok, reason = ns.tracker:start(ns.currentZone())
   ns.print(ok and "Session started." or reason)
   return ok
 end)
@@ -68,9 +41,10 @@ function ns.stopSessionAndShowSummary()
     ns.print(reason)
     return nil
   end
-  ns.print(("Session stopped after %s of active time."):format(duration(stopped.activeTime)))
+  ns.print(("Session stopped after %s of active time."):format(ns.activeTimeText(stopped.activeTime)))
   print(("  Raw gold %s, looted item value %s, total %s: %s per hour."):format(
-    money(stopped.rawGold), money(stopped.lootedItemValue), money(stopped.total), money(stopped.gph)))
+    GetMoneyString(stopped.rawGold), GetMoneyString(stopped.lootedItemValue),
+    GetMoneyString(stopped.total), GetMoneyString(stopped.gph)))
   ns.showSummary(stopped)
   return true
 end

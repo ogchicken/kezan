@@ -13,6 +13,13 @@ function ns.print(message)
   print("|cffd4af37Kezan|r " .. message)
 end
 
+-- Whether a value from the game arrived secret, so it can't be read or
+-- compared (research/2026-11-27-loot-and-money-events.md). A client
+-- without secret values has none.
+function ns.isSecret(value)
+  return issecretvalue ~= nil and issecretvalue(value)
+end
+
 -- Events. ns.on(event, handler) registers the event on first use and calls
 -- each handler with the event's payload. Register only events seen to fire
 -- on Forever (CODING_STANDARDS.md).
@@ -45,7 +52,9 @@ local lootStrings = {
   LOOT_ITEM_SELF = LOOT_ITEM_SELF,
   LOOT_ITEM_SELF_MULTIPLE = LOOT_ITEM_SELF_MULTIPLE,
   YOU_LOOT_MONEY = YOU_LOOT_MONEY,
+  YOU_LOOT_MONEY_GUILD = YOU_LOOT_MONEY_GUILD,
   LOOT_MONEY_SPLIT = LOOT_MONEY_SPLIT,
+  LOOT_MONEY_SPLIT_GUILD = LOOT_MONEY_SPLIT_GUILD,
   GOLD_AMOUNT = GOLD_AMOUNT,
   SILVER_AMOUNT = SILVER_AMOUNT,
   COPPER_AMOUNT = COPPER_AMOUNT,
@@ -77,8 +86,8 @@ ns.on("ADDON_LOADED", function(loadedName)
 end)
 
 -- Slash commands. ns.addCommand(name, summary, run) adds `/kz <name>`;
--- run gets the rest of the line. `/kz` alone prints the version and the
--- commands, in the order they were added.
+-- run takes no argument. `/kz` alone prints the version and the commands,
+-- in the order they were added.
 local commands = {}
 
 function ns.addCommand(name, summary, run)
@@ -95,7 +104,7 @@ end
 SLASH_KEZAN1 = "/kezan"
 SLASH_KEZAN2 = "/kz"
 SlashCmdList.KEZAN = function(message)
-  local name, rest = message:match("^%s*(%S*)%s*(.-)%s*$")
+  local name = message:match("^%s*(%S*)")
   name = name:lower()
   if name == "" then
     printHelp()
@@ -104,7 +113,7 @@ SlashCmdList.KEZAN = function(message)
   for _, command in ipairs(commands) do
     if command.name == name then
       if ns.tracker then
-        command.run(rest)
+        command.run()
       end
       return
     end

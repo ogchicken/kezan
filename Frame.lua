@@ -35,16 +35,16 @@ local BUTTON_LABELS = {
 
 -- The figures shown, one row each, top to bottom.
 local ROWS = {
-  { key = "activeTime", label = "Active time", format = ns.duration },
-  { key = "rawGold", label = "Raw gold", format = ns.money },
-  { key = "lootedItemValue", label = "Item value", format = ns.money },
-  { key = "total", label = "Total", format = ns.money },
-  { key = "gph", label = "Per hour", format = ns.money },
+  { key = "activeTime", label = "Active time", format = ns.activeTimeText },
+  { key = "rawGold", label = "Raw gold", format = GetMoneyString },
+  { key = "lootedItemValue", label = "Looted item value", format = GetMoneyString },
+  { key = "total", label = "Total", format = GetMoneyString },
+  { key = "gph", label = "Per hour", format = GetMoneyString },
 }
 
 -- KezanDB.frame: { shown, point, relativePoint, x, y }. An optional table,
 -- filled with defaults on first use; no schema change.
-local function settings()
+local function frameLayout()
   local saved = ns.db.frame
   if not saved then
     saved = { shown = true }
@@ -116,7 +116,7 @@ end
 
 local function savePosition()
   local point, _, relativePoint, x, y = frame:GetPoint()
-  local saved = settings()
+  local saved = frameLayout()
   saved.point, saved.relativePoint, saved.x, saved.y = point, relativePoint, x, y
 end
 
@@ -125,24 +125,7 @@ local function build()
   frame:SetSize(WIDTH, PADDING + ROW_HEIGHT * (1 + #ROWS) + 10 + BUTTON_HEIGHT + PADDING)
   frame:SetFrameStrata("MEDIUM")
   frame:SetClampedToScreen(true)
-  frame:SetBackdrop({
-    bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
-    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-    tile = true,
-    tileSize = 16,
-    edgeSize = 16,
-    insets = { left = 4, right = 4, top = 4, bottom = 4 },
-  })
-  frame:SetBackdropColor(0, 0, 0, 0.8)
-
-  frame:SetMovable(true)
-  frame:EnableMouse(true)
-  frame:RegisterForDrag("LeftButton")
-  frame:SetScript("OnDragStart", frame.StartMoving)
-  frame:SetScript("OnDragStop", function()
-    frame:StopMovingOrSizing()
-    savePosition()
-  end)
+  ns.styleWindow(frame, 0.8, savePosition)
 
   local title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   title:SetPoint("TOPLEFT", PADDING, -PADDING)
@@ -204,7 +187,7 @@ local function build()
   end)
   frame:SetScript("OnShow", update)
 
-  local saved = settings()
+  local saved = frameLayout()
   frame:SetPoint(saved.point, UIParent, saved.relativePoint, saved.x, saved.y)
   frame:Hide()
 end
@@ -212,7 +195,7 @@ end
 -- The one way to show or hide the frame, for /kz show and hide and the
 -- settings toggle. The choice is saved. Call it after ADDON_LOADED.
 function ns.setFrameShown(shown)
-  settings().shown = shown and true or false
+  frameLayout().shown = shown and true or false
   if frame then
     frame:SetShown(shown)
   end
@@ -220,7 +203,7 @@ end
 
 -- Whether the frame is set to be shown. Call it after ADDON_LOADED.
 function ns.isFrameShown()
-  return settings().shown
+  return frameLayout().shown
 end
 
 ns.on("ADDON_LOADED", function(loadedName)

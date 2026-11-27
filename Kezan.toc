@@ -9,11 +9,14 @@
 ## X-Website: https://github.com/ogchicken/kezan
 
 Core\LootLines.lua
+Core\ItemLinks.lua
 Core\Valuation.lua
 Core\Items.lua
 Core\Summary.lua
 Core\Tracker.lua
 Kezan.lua
+Text.lua
+Windows.lua
 Lifecycle.lua
 Chat.lua
 ItemFacts.lua

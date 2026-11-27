@@ -8,6 +8,13 @@ Tracker.__index = Tracker
 
 local SECONDS_PER_HOUR = 3600
 
+-- Session states, as stored on a session and shown in the frame figures.
+-- NO_SESSION is never stored: it is the state when there is no current
+-- session.
+local RUNNING = "running"
+local PAUSED = "paused"
+local NO_SESSION = "none"
+
 -- ports: clock, itemFacts, lootStrings (each documented with its fake in
 -- spec/support/tracker.lua), priceSources, and two options:
 -- - priceSources: the price source ports of the price addons that are
@@ -57,11 +64,11 @@ function Tracker:priceSource()
   return AUCTIONATOR
 end
 
--- Keeps the price source choice, "auctionator" or "none", in saved state.
--- Item values follow it at the next refresh.
+-- Keeps the price source choice, "auctionator" or "none", in saved state,
+-- and re-values the current session's items from it at once.
 function Tracker:setPriceSource(name)
   self.saved.priceSource = name
-  return true
+  self:refresh()
 end
 
 -- What valuing an item reads: the item facts port and the chosen price
@@ -76,7 +83,7 @@ end
 -- The current session if it is counting loot, else nil.
 function Tracker:runningSession()
   local session = self:currentSession()
-  if session and session.state == "running" then
+  if session and session.state == RUNNING then
     return session
   end
   return nil
@@ -86,12 +93,23 @@ end
 -- time since the current run started.
 local function activeTime(session, now)
   local seconds = session.accumulatedSeconds
-  if session.state == "running" then
+  if session.state == RUNNING then
     seconds = seconds + (now - session.runStartedAt)
   end
   return seconds
 end
 
+-- What frameFigures reads when there is no current session, so that every
+-- figure is 0. Never stored, and never changed.
+local NO_SESSION_RECORD = {
+  state = NO_SESSION,
+  accumulatedSeconds = 0,
+  rawGold = 0,
+  unreadableLines = 0,
+}
+
+-- The figures of a session at `now`. Each of them is also kept in the
+-- history at stop (see Core/Summary.lua), except `state`.
 local function figuresOf(session, now)
   local seconds = activeTime(session, now)
   local lootedItemValue = ns.Items.lootedItemValue(session)
@@ -118,14 +136,14 @@ end
 -- nil when the in-game layer could not tell.
 function Tracker:start(zone)
   local current = self:currentSession()
-  if current and current.state == "paused" then
+  if current and current.state == PAUSED then
     return nil, "A session is already paused. Resume or stop it first."
   elseif current then
     return nil, "A session is already running."
   end
   local now = self.ports.clock.now()
   self:setCurrentSession({
-    state = "running",
+    state = RUNNING,
     startZone = zone,
     startedAt = now,
     runStartedAt = now,
@@ -141,12 +159,12 @@ function Tracker:pause()
   local session = self:currentSession()
   if not session then
     return nil, "There is no session to pause."
-  elseif session.state == "paused" then
+  elseif session.state == PAUSED then
     return nil, "The session is already paused."
   end
   local now = self.ports.clock.now()
   session.accumulatedSeconds = activeTime(session, now)
-  session.state = "paused"
+  session.state = PAUSED
   return true
 end
 
@@ -154,11 +172,11 @@ function Tracker:resume()
   local session = self:currentSession()
   if not session then
     return nil, "There is no session to resume."
-  elseif session.state == "running" then
+  elseif session.state == RUNNING then
     return nil, "The session is already running."
   end
   session.runStartedAt = self.ports.clock.now()
-  session.state = "running"
+  session.state = RUNNING
   return true
 end
 
@@ -222,7 +240,7 @@ function Tracker:gameLoaded(kind)
   if kind == "reload" then
     session.runStartedAt = self.ports.clock.now()
   else
-    session.state = "paused"
+    session.state = PAUSED
   end
 end
 
@@ -293,27 +311,15 @@ end
 -- The commands that apply in each state, in the order the frame shows
 -- their buttons. Each is the name of a tracker method.
 local COMMANDS = {
-  none = { "start" },
-  running = { "pause", "stop" },
-  paused = { "resume", "stop" },
+  [NO_SESSION] = { "start" },
+  [RUNNING] = { "pause", "stop" },
+  [PAUSED] = { "resume", "stop" },
 }
 
 -- The figures the frame shows, with `commands`: the commands that apply
 -- now (see COMMANDS). Read after refresh, so that item values are current.
 function Tracker:frameFigures()
-  local session = self:currentSession()
-  if not session then
-    return {
-      state = "none",
-      activeTime = 0,
-      rawGold = 0,
-      lootedItemValue = 0,
-      total = 0,
-      gph = 0,
-      unreadableLines = 0,
-      commands = COMMANDS.none,
-    }
-  end
+  local session = self:currentSession() or NO_SESSION_RECORD
   local figures = figuresOf(session, self.ports.clock.now())
   figures.commands = COMMANDS[session.state]
   return figures

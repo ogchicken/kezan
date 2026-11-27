@@ -31,8 +31,13 @@ end
 function LootLines.new(strings)
   local reader = setmetatable({}, LootLines)
   -- Solo, the player loots the whole coin; in a group, the coin is split
-  -- and the line names only the player's share.
+  -- and the line names only the player's share. With a guild perk, part of
+  -- the coin goes to the guild bank and the line names that part second;
+  -- the first capture is the player's. The guild forms are tried first:
+  -- the plain forms' `(.-)` would take the deposit too.
   reader.ownCoin = {
+    patternFor(strings.YOU_LOOT_MONEY_GUILD),
+    patternFor(strings.LOOT_MONEY_SPLIT_GUILD),
     patternFor(strings.YOU_LOOT_MONEY),
     patternFor(strings.LOOT_MONEY_SPLIT),
   }
@@ -62,7 +67,8 @@ end
 
 -- Reads a coin line. Returns the copper the player received, or nil when
 -- the line is neither the player's own "You loot" line nor their share of
--- split coin. A groupmate's "loots" line is neither.
+-- split coin. A groupmate's "loots" line is neither. Coin deposited to the
+-- guild bank is not the player's, so it never counts.
 function LootLines:ownCoinCopper(text)
   for _, pattern in ipairs(self.ownCoin) do
     local moneyText = text:match(pattern)

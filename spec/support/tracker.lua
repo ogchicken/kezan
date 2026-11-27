@@ -4,12 +4,16 @@
 local support = {}
 
 -- The enUS values of the client's own loot and coin format strings on
--- Forever (research/2026-11-27-loot-and-money-events.md, section 3).
+-- Forever (research/2026-11-27-loot-and-money-events.md, section 3; the
+-- two _GUILD forms from the enUS GlobalStrings of Forever build 70938 in
+-- Ketho/BlizzardInterfaceResources).
 support.enUSLootStrings = {
   LOOT_ITEM_SELF = "You receive loot: %s",
   LOOT_ITEM_SELF_MULTIPLE = "You receive loot: %sx%d",
   YOU_LOOT_MONEY = "You loot %s",
+  YOU_LOOT_MONEY_GUILD = "You loot %s (%s deposited to guild bank)",
   LOOT_MONEY_SPLIT = "Your share of the loot is %s.",
+  LOOT_MONEY_SPLIT_GUILD = "Your share of the loot is %s. (%s deposited to guild bank)",
   GOLD_AMOUNT = "%d Gold",
   SILVER_AMOUNT = "%d Silver",
   COPPER_AMOUNT = "%d Copper",
@@ -17,9 +21,11 @@ support.enUSLootStrings = {
 
 -- An item link as the client puts it in a chat line, such as
 -- "|cffffffff|Hitem:2447::::::::60:::::::::|h[Peacebloom]|h|r". `color`
--- is the quality colour without "|c"; white when left out.
-function support.itemLink(itemID, name, color)
-  return ("|c%s|Hitem:%d::::::::60:::::::::|h[%s]|h|r"):format(color or "ffffffff", itemID, name)
+-- is the quality colour without "|c"; white when left out. `level` is the
+-- looting player's level, which the client writes into the link; 60 when
+-- left out.
+function support.itemLink(itemID, name, color, level)
+  return ("|c%s|Hitem:%d::::::::%d:::::::::|h[%s]|h|r"):format(color or "ffffffff", itemID, level or 60, name)
 end
 
 -- Loads every session-core file listed in Kezan.toc, in TOC order, into a

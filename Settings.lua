@@ -23,8 +23,6 @@ local function addPriceSource(category)
 
   local function setValue(name)
     ns.tracker:setPriceSource(name)
-    -- Values follow the choice at once rather than at the frame's next update.
-    ns.tracker:refresh()
   end
 
   -- The default is what the tracker picks with no choice made: Auctionator

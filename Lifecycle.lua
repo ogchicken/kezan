@@ -5,9 +5,7 @@
 
 local _, ns = ...
 
-local function isSecret(value)
-  return issecretvalue ~= nil and issecretvalue(value)
-end
+local isSecret = ns.isSecret
 
 -- PLAYER_ENTERING_WORLD also fires on every loading screen between zones,
 -- with both flags false; that is not a game load. A flag that can't be read

@@ -2,6 +2,12 @@
 -- quantity looted and the item value it was last given. Internal to the
 -- session core; only the tracker calls it.
 --
+-- An entry is keyed by the link the item was first looted with: a real
+-- link, which the summary shows and the price source and item facts are
+-- asked about. A later drop of the same item adds to it even when its link
+-- differs in a field that describes the looting player rather than the
+-- item (see ItemLinks.sameItemKey).
+--
 -- session.items[itemLink] = {
 --   quantity = <n>,          -- every drop of the item added up
 --   itemValue = <copper>,    -- per unit, from the last valuation
@@ -18,10 +24,25 @@ local function value(entry, link, ports)
     ns.Valuation.itemValue(link, ports.itemFacts.lookup(link), ports.priceSource)
 end
 
+-- The link the session holds the item under, or nil if it holds none.
+local function heldLink(session, link)
+  if session.items[link] then
+    return link
+  end
+  local key = ns.ItemLinks.sameItemKey(link)
+  for held in pairs(session.items) do
+    if ns.ItemLinks.sameItemKey(held) == key then
+      return held
+    end
+  end
+  return nil
+end
+
 -- Adds a drop of `quantity` units of the item to the session, and values
 -- the item.
 function Items.add(session, link, quantity, ports)
   session.items = session.items or {}
+  link = heldLink(session, link) or link
   local entry = session.items[link]
   if not entry then
     entry = { quantity = 0 }
@@ -31,17 +52,12 @@ function Items.add(session, link, quantity, ports)
   value(entry, link, ports)
 end
 
--- The item ID in an item link, such as 2447 in "|Hitem:2447::...".
-local function itemIDOf(link)
-  return tonumber(link:match("|Hitem:(%d+)"))
-end
-
 -- Takes one unit of the item with this item ID out of the session, for an
 -- opened item. An item whose quantity reaches 0 leaves the session. Returns
 -- true if the session held a unit, else false.
 function Items.remove(session, itemID)
   for link, entry in pairs(session.items or {}) do
-    if itemIDOf(link) == itemID and entry.quantity > 0 then
+    if ns.ItemLinks.itemID(link) == itemID and entry.quantity > 0 then
       entry.quantity = entry.quantity - 1
       if entry.quantity == 0 then
         session.items[link] = nil

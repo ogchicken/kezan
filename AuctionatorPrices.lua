@@ -17,7 +17,7 @@ end
 local function ahCopper(api, itemLink)
   local copper = api.GetAuctionPriceByItemLink(CALLER_ID, itemLink)
   if copper == nil then
-    local itemID = tonumber(itemLink:match("|Hitem:(%d+)"))
+    local itemID = ns.ItemLinks.itemID(itemLink)
     if itemID then
       copper = api.GetAuctionPriceByItemID(CALLER_ID, itemID)
     end

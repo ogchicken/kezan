@@ -44,9 +44,6 @@ function Summary.topItems(items)
   return list
 end
 
--- The fields a stored session copies from the stopped session's figures.
-local FIGURES = { "activeTime", "rawGold", "lootedItemValue", "total", "gph", "unreadableLines" }
-
 local function copyItems(items)
   local copy = {}
   for link, entry in pairs(items or {}) do
@@ -56,7 +53,8 @@ local function copyItems(items)
 end
 
 -- What the history keeps of a session stopped at `now`, given its final
--- figures. Its items are copies, so they no longer follow prices.
+-- figures: every figure but `state`. Its items are copies, so they no
+-- longer follow prices.
 function Summary.stored(session, figures, character, now)
   local stored = {
     character = character,
@@ -65,8 +63,10 @@ function Summary.stored(session, figures, character, now)
     stoppedAt = now,
     items = copyItems(session.items),
   }
-  for _, key in ipairs(FIGURES) do
-    stored[key] = figures[key]
+  for key, value in pairs(figures) do
+    if key ~= "state" then
+      stored[key] = value
+    end
   end
   return stored
 end
