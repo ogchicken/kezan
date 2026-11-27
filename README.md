@@ -16,13 +16,19 @@ The repository is set up and the addon skeleton loads a slash command; there is 
 
 ## Install for development
 
-The repository root is the addon folder. Link it into the Forever AddOns folder under the name `Kezan` (run in an elevated PowerShell, adjusting the game path):
+The repository root is the addon folder. Link it into the Forever AddOns folder under the name `Kezan` with a junction, adjusting the game path (a junction needs no elevated shell):
 
 ```powershell
 New-Item -ItemType Junction -Path "C:\Program Files (x86)\World of Warcraft\_forever_\Interface\AddOns\Kezan" -Target "$HOME\Desktop\Code\kezan"
 ```
 
-Type `/reload` in game after editing a Lua file.
+The junction is the project folder itself, not a copy, so a saved edit is in the game folder at once. The client reads files only when it loads them:
+
+- Type `/reload` in game after editing a Lua file. If a TOC change, such as a new file or saved variable, does not show after `/reload`, restart the client.
+- The client loads whichever branch is checked out. Type `/reload` after switching branches.
+- `KezanDB` lives outside the repository, in `_forever_\WTF\Account\<account>\SavedVariables\Kezan.lua`. The client writes it on `/reload` and on logout, overwriting any edit made while the game runs.
+
+To remove the link, run `cmd /c rmdir "C:\Program Files (x86)\World of Warcraft\_forever_\Interface\AddOns\Kezan"`, which deletes only the junction. Never run `Remove-Item -Recurse` on it: Windows PowerShell 5.1 follows the junction and deletes the project's files.
 
 ## Docs
 
