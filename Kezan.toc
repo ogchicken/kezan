@@ -8,5 +8,8 @@
 ## X-License: MIT
 ## X-Website: https://github.com/ogchicken/kezan
 
+Core\LootLines.lua
 Core\Tracker.lua
 Kezan.lua
+Chat.lua
+Commands.lua

@@ -81,8 +81,10 @@ function support.fakePriceSource(pricesByLink)
 end
 
 -- Builds a tracker. Any port left out of `ports` gets a fake: the clock at
--- 0, no item facts, no prices, the enUS loot strings. Returns the tracker
--- and the ports it was built with.
+-- 0, no item facts, no prices, the enUS loot strings. Options left out get
+-- an empty saved state and the character "Farmer-Realm"; pass one
+-- `savedState` to two trackers to see what a later tracker finds. Returns
+-- the tracker and the ports it was built with.
 function support.newTracker(ports)
   ports = ports or {}
   local ns = support.loadCore()
@@ -91,6 +93,8 @@ function support.newTracker(ports)
     itemFacts = ports.itemFacts or support.fakeItemFacts(),
     priceSource = ports.priceSource or support.fakePriceSource(),
     lootStrings = ports.lootStrings or support.enUSLootStrings,
+    savedState = ports.savedState or {},
+    character = ports.character or "Farmer-Realm",
   }
   return ns.Tracker.new(built), built
 end
