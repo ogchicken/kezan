@@ -125,24 +125,7 @@ local function build()
   frame:SetSize(WIDTH, PADDING + ROW_HEIGHT * (1 + #ROWS) + 10 + BUTTON_HEIGHT + PADDING)
   frame:SetFrameStrata("MEDIUM")
   frame:SetClampedToScreen(true)
-  frame:SetBackdrop({
-    bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
-    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-    tile = true,
-    tileSize = 16,
-    edgeSize = 16,
-    insets = { left = 4, right = 4, top = 4, bottom = 4 },
-  })
-  frame:SetBackdropColor(0, 0, 0, 0.8)
-
-  frame:SetMovable(true)
-  frame:EnableMouse(true)
-  frame:RegisterForDrag("LeftButton")
-  frame:SetScript("OnDragStart", frame.StartMoving)
-  frame:SetScript("OnDragStop", function()
-    frame:StopMovingOrSizing()
-    savePosition()
-  end)
+  ns.styleWindow(frame, 0.8, savePosition)
 
   local title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   title:SetPoint("TOPLEFT", PADDING, -PADDING)

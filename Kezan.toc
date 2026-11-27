@@ -16,6 +16,7 @@ Core\Summary.lua
 Core\Tracker.lua
 Kezan.lua
 Text.lua
+Windows.lua
 Lifecycle.lua
 Chat.lua
 ItemFacts.lua

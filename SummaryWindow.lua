@@ -108,21 +108,7 @@ local function build()
   window:SetFrameStrata("DIALOG")
   window:SetClampedToScreen(true)
   window:SetPoint("CENTER")
-  window:SetBackdrop({
-    bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
-    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-    tile = true,
-    tileSize = 16,
-    edgeSize = 16,
-    insets = { left = 4, right = 4, top = 4, bottom = 4 },
-  })
-  window:SetBackdropColor(0, 0, 0, 0.9)
-
-  window:SetMovable(true)
-  window:EnableMouse(true)
-  window:RegisterForDrag("LeftButton")
-  window:SetScript("OnDragStart", window.StartMoving)
-  window:SetScript("OnDragStop", window.StopMovingOrSizing)
+  ns.styleWindow(window, 0.9)
 
   local title = window:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   title:SetPoint("TOPLEFT", PADDING, -PADDING)
