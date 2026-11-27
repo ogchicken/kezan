@@ -23,6 +23,7 @@ function Tracker.new(ports)
   tracker.character = ports.character
   tracker.saved = ports.savedState
   tracker.saved.currentSessions = tracker.saved.currentSessions or {}
+  tracker.saved.history = tracker.saved.history or {}
   tracker.priceSources = ports.priceSources or {}
   tracker.lines = ns.LootLines.new(ports.lootStrings)
   return tracker
@@ -112,7 +113,10 @@ end
 
 -- Commands return a true value on success, or nil and a reason the slash
 -- command can print.
-function Tracker:start()
+--
+-- zone: the name of the zone the session starts in, kept for the summary;
+-- nil when the in-game layer could not tell.
+function Tracker:start(zone)
   local current = self:currentSession()
   if current and current.state == "paused" then
     return nil, "A session is already paused. Resume or stop it first."
@@ -122,6 +126,7 @@ function Tracker:start()
   local now = self.ports.clock.now()
   self:setCurrentSession({
     state = "running",
+    startZone = zone,
     startedAt = now,
     runStartedAt = now,
     accumulatedSeconds = 0,
@@ -157,18 +162,36 @@ function Tracker:resume()
   return true
 end
 
--- Returns the stopped session's figures, with `items`: its looted items
--- by item link, each { quantity, itemValue, pricing }.
+-- Ends the session and keeps it in the history (see Core/Summary.lua),
+-- its item values frozen as they are now. Returns its summary: the stored
+-- session's fields, `items` and `topItems`, and `state` as it was at stop
+-- ("running" or "paused").
 function Tracker:stop()
   local session = self:currentSession()
   if not session then
     return nil, "There is no session to stop."
   end
+  local now = self.ports.clock.now()
   ns.Items.refresh(session, self:valuationPorts())
-  local figures = figuresOf(session, self.ports.clock.now())
-  figures.items = session.items or {}
+  local stored = ns.Summary.stored(session, figuresOf(session, now), self.character, now)
+  table.insert(self.saved.history, stored)
   self:setCurrentSession(nil)
-  return figures
+  local summary = ns.Summary.of(stored)
+  summary.state = session.state
+  return summary
+end
+
+-- The summary of this character's latest stopped session, the same as
+-- stop returned but without `state`, or nil and a reason when there is
+-- none.
+function Tracker:lastSummary()
+  local history = self.saved.history
+  for index = #history, 1, -1 do
+    if history[index].character == self.character then
+      return ns.Summary.of(history[index])
+    end
+  end
+  return nil, "No session has been stopped on this character yet."
 end
 
 -- A notice that the game is unloading, just before the client writes the
