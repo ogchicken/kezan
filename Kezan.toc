@@ -13,6 +13,7 @@ Core\Valuation.lua
 Core\Items.lua
 Core\Tracker.lua
 Kezan.lua
+Lifecycle.lua
 Chat.lua
 ItemFacts.lua
 Commands.lua
