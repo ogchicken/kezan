@@ -11,6 +11,7 @@
 Core\LootLines.lua
 Core\Valuation.lua
 Core\Items.lua
+Core\Summary.lua
 Core\Tracker.lua
 Kezan.lua
 Lifecycle.lua
