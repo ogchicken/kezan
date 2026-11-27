@@ -6,7 +6,7 @@ Kezan is named after the goblin homeland, seat of the trade cartels.
 
 ## Status
 
-The addon skeleton loads a slash command. The session core has its tracker and test seam, but no tracking rules yet. The research behind the name and the target platform is in [research/](research/). The first milestone is in [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md).
+A session counts raw gold: `/kz start`, loot coin, and `/kz stop` prints the raw gold, active time and gold per hour. Items, pausing, the frame and the price source are still to come in milestone 1. The research behind the name and the target platform is in [research/](research/). The first milestone is in [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md).
 
 ## Start here
 
@@ -85,7 +85,9 @@ The compiler is needed only while installing rocks. hererocks can install LuaRoc
 ```text
 Kezan.toc                addon manifest (Interface 16001); loads Core/ first
 Core/                    session core: plain Lua 5.1, no WoW globals
-Kezan.lua                in-game layer: addon entry point
+Kezan.lua                in-game layer: entry point, event and slash-command registries
+Chat.lua                 in-game layer: chat-event adapters
+Commands.lua             in-game layer: the /kz session commands
 spec/                    busted tests of the session core, and their fakes
 .luacheckrc              lint rules, including the session core's
 .github/workflows/       CI: luacheck and busted on every pull request
