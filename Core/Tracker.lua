@@ -206,7 +206,7 @@ end
 -- chat text, already checked not to be secret.
 function Tracker:chatLine(kind, text)
   local session = self:runningSession()
-  if not session then
+  if not session or self.windowFromOldStock then
     return
   end
   if kind == "coin" then
@@ -220,6 +220,31 @@ function Tracker:chatLine(kind, text)
       ns.Items.add(session, link, quantity, self:valuationPorts())
     end
   end
+end
+
+-- A notice that a loot window opened from an item (ADR 0004, opened
+-- items): a clam, a lockbox or an item being disenchanted. itemID is that
+-- item's item ID, or nil when the in-game layer could not tell which item
+-- it was.
+--
+-- If the session holds a unit of the item, that unit leaves the session
+-- and the window's contents count. If it holds none, the item was in the
+-- bags before the session started, so no line counts until the window
+-- closes. An unknown item removes nothing and its contents count. Only one
+-- loot window is open at a time, so a new one replaces the last.
+--
+-- The window is not saved: a reload or logout closes it.
+function Tracker:lootWindowOpened(itemID)
+  self.windowFromOldStock = nil
+  local session = self:runningSession()
+  if session and itemID then
+    self.windowFromOldStock = not ns.Items.remove(session, itemID)
+  end
+end
+
+-- A notice that the loot window closed: lines count as usual again.
+function Tracker:lootWindowClosed()
+  self.windowFromOldStock = nil
 end
 
 -- A notice that a loot or coin line arrived secret, so its text could not

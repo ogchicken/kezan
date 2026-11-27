@@ -31,6 +31,27 @@ function Items.add(session, link, quantity, ports)
   value(entry, link, ports)
 end
 
+-- The item ID in an item link, such as 2447 in "|Hitem:2447::...".
+local function itemIDOf(link)
+  return tonumber(link:match("|Hitem:(%d+)"))
+end
+
+-- Takes one unit of the item with this item ID out of the session, for an
+-- opened item. An item whose quantity reaches 0 leaves the session. Returns
+-- true if the session held a unit, else false.
+function Items.remove(session, itemID)
+  for link, entry in pairs(session.items or {}) do
+    if itemIDOf(link) == itemID and entry.quantity > 0 then
+      entry.quantity = entry.quantity - 1
+      if entry.quantity == 0 then
+        session.items[link] = nil
+      end
+      return true
+    end
+  end
+  return false
+end
+
 -- Re-values every item of the session from the ports.
 function Items.refresh(session, ports)
   for link, entry in pairs(session.items or {}) do
