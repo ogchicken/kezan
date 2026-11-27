@@ -17,3 +17,4 @@ Lifecycle.lua
 Chat.lua
 ItemFacts.lua
 Commands.lua
+Frame.lua
