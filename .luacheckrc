@@ -30,7 +30,8 @@ stds.wow = {
 
 -- In-game layer: every file outside Core/ and spec/.
 std = "lua51+wow"
-exclude_files = { ".release/", ".claude/", "lua_modules/" }
+-- .lua/, .luarocks/ and .install/ are where the CI actions install Lua and the rocks.
+exclude_files = { ".release/", ".claude/", "lua_modules/", ".lua/", ".luarocks/", ".install/" }
 -- A method that ignores its implicit self is normal.
 self = false
 

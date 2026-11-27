@@ -12,3 +12,8 @@ Thumbs.db
 
 # Claude Code agent worktrees and local state
 /.claude/
+
+# Lua and rocks installed into the checkout by CI
+/.lua/
+/.luarocks/
+/.install/
