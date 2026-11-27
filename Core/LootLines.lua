@@ -30,7 +30,12 @@ end
 -- strings: the loot strings port, keyed by the WoW global names.
 function LootLines.new(strings)
   local reader = setmetatable({}, LootLines)
-  reader.ownCoin = patternFor(strings.YOU_LOOT_MONEY)
+  -- Solo, the player loots the whole coin; in a group, the coin is split
+  -- and the line names only the player's share.
+  reader.ownCoin = {
+    patternFor(strings.YOU_LOOT_MONEY),
+    patternFor(strings.LOOT_MONEY_SPLIT),
+  }
   -- The multiple form is tried first: the single form's `(.-)` would take
   -- "[Peacebloom]x3" whole as the link.
   reader.ownItemMultiple = patternFor(strings.LOOT_ITEM_SELF_MULTIPLE)
@@ -55,14 +60,17 @@ function LootLines:copperIn(moneyText)
   return copper
 end
 
--- Reads a coin line. Returns the copper the player looted, or nil when the
--- line is not the player's own "You loot" line.
+-- Reads a coin line. Returns the copper the player received, or nil when
+-- the line is neither the player's own "You loot" line nor their share of
+-- split coin. A groupmate's "loots" line is neither.
 function LootLines:ownCoinCopper(text)
-  local moneyText = text:match(self.ownCoin)
-  if not moneyText then
-    return nil
+  for _, pattern in ipairs(self.ownCoin) do
+    local moneyText = text:match(pattern)
+    if moneyText then
+      return self:copperIn(moneyText)
+    end
   end
-  return self:copperIn(moneyText)
+  return nil
 end
 
 -- Reads an item line. Returns the item link and the quantity of the
