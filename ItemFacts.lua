@@ -20,7 +20,7 @@ ns.itemFacts = {
       return nil
     end
     return {
-      itemID = tonumber(itemLink:match("|Hitem:(%d+)")),
+      itemID = ns.ItemLinks.itemID(itemLink),
       quality = quality,
       soulbound = bindType == BIND_ON_PICKUP or bindType == BIND_QUEST
         or classID == QUEST_ITEM_CLASS,

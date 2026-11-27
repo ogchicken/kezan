@@ -9,6 +9,7 @@
 ## X-Website: https://github.com/ogchicken/kezan
 
 Core\LootLines.lua
+Core\ItemLinks.lua
 Core\Valuation.lua
 Core\Items.lua
 Core\Summary.lua
