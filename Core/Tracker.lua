@@ -57,11 +57,11 @@ function Tracker:priceSource()
   return AUCTIONATOR
 end
 
--- Keeps the price source choice, "auctionator" or "none", in saved state.
--- Item values follow it at the next refresh.
+-- Keeps the price source choice, "auctionator" or "none", in saved state,
+-- and re-values the current session's items from it at once.
 function Tracker:setPriceSource(name)
   self.saved.priceSource = name
-  return true
+  self:refresh()
 end
 
 -- What valuing an item reads: the item facts port and the chosen price

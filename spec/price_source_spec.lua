@@ -185,8 +185,7 @@ describe("the price source choice", function()
     first:start()
     first:chatLine("loot", "You receive loot: " .. SILK)
 
-    assert.is_true(first:setPriceSource("none"))
-    first:refresh()
+    first:setPriceSource("none")
     assert.are.equal(37, first:frameFigures().lootedItemValue)
 
     local later = support.newTracker({
@@ -196,7 +195,6 @@ describe("the price source choice", function()
     })
     assert.are.same({ "none" }, { later:priceSource() })
     later:setPriceSource("auctionator")
-    later:refresh()
     assert.are.equal(250, later:frameFigures().lootedItemValue)
   end)
 end)
@@ -215,7 +213,7 @@ describe("the price source the settings panel shows", function()
     assert.are.same({ "none", "Auctionator is not loaded." }, { tracker:priceSource() })
   end)
 
-  it("gives vendor values from the next refresh once None is chosen with Auctionator loaded", function()
+  it("gives vendor values at once when None is chosen with Auctionator loaded", function()
     local tracker = support.newTracker({
       itemFacts = silkFacts(),
       priceSources = { auctionator = support.fakePriceSource({ [SILK] = { copper = 250, ageDays = 0 } }) },
@@ -225,10 +223,8 @@ describe("the price source the settings panel shows", function()
     assert.are.equal(500, tracker:frameFigures().lootedItemValue)
 
     tracker:setPriceSource("none")
-    assert.are.same({ "none" }, { tracker:priceSource() })
-    assert.are.equal(500, tracker:frameFigures().lootedItemValue)
-    tracker:refresh()
 
+    assert.are.same({ "none" }, { tracker:priceSource() })
     assert.are.equal(74, tracker:frameFigures().lootedItemValue)
     assert.are.same({ quantity = 2, itemValue = 37, pricing = "vendor" }, tracker:stop().items[SILK])
   end)
