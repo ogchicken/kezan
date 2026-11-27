@@ -149,6 +149,8 @@ function Tracker:gameLoaded(kind)
   if not session then
     return
   end
+  -- With no last save on record, the end of the run is unknown, so none of
+  -- it counts rather than risk counting time logged out.
   local savedAt = session.lastSavedAt or session.runStartedAt
   session.accumulatedSeconds = session.accumulatedSeconds
     + math.max(0, savedAt - session.runStartedAt)
