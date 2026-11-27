@@ -1,0 +1,8 @@
+# Every text file is LF, in the repository and in each checkout, whatever the
+# machine's core.autocrlf.
+* text=auto eol=lf
+
+# Game assets are binary.
+*.blp binary
+*.tga binary
+*.ogg binary

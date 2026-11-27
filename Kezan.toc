@@ -1,0 +1,11 @@
+## Interface: 16001
+## Title: Kezan
+## Notes: Gold per hour and gold-making tools for WoW Forever.
+## Author: ogchicken
+## Version: 0.0.1
+## SavedVariables: KezanDB
+## OptionalDeps: Auctionator, TradeSkillMaster
+## X-License: MIT
+## X-Website: https://github.com/ogchicken/kezan
+
+Kezan.lua

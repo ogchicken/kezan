@@ -1,0 +1,14 @@
+# packaged releases
+/.release/
+*.zip
+
+# misc
+.DS_Store
+Thumbs.db
+
+# editor
+.vscode/
+.idea/
+
+# Claude Code agent worktrees and local state
+/.claude/
