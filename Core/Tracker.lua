@@ -8,8 +8,11 @@ Tracker.__index = Tracker
 
 local SECONDS_PER_HOUR = 3600
 
--- ports: clock, itemFacts, priceSource, lootStrings (each documented with its
--- fake in spec/support/tracker.lua), and two options:
+-- ports: clock, itemFacts, lootStrings (each documented with its fake in
+-- spec/support/tracker.lua), priceSources, and two options:
+-- - priceSources: the price source ports of the price addons that are
+--   loaded, by name; today only `auctionator`. Each is shaped like
+--   support.fakePriceSource. A source missing from it is not loaded.
 -- - savedState: the table the in-game layer stores as KezanDB. The tracker
 --   keeps its state there as it changes, so a tracker built later on the
 --   same table carries on where this one left off.
@@ -20,6 +23,7 @@ function Tracker.new(ports)
   tracker.character = ports.character
   tracker.saved = ports.savedState
   tracker.saved.currentSessions = tracker.saved.currentSessions or {}
+  tracker.priceSources = ports.priceSources or {}
   tracker.lines = ns.LootLines.new(ports.lootStrings)
   return tracker
 end
@@ -32,6 +36,39 @@ end
 
 function Tracker:setCurrentSession(session)
   self.saved.currentSessions[self.character] = session
+end
+
+-- Price sources by the name kept as the choice in saved state.
+local AUCTIONATOR = "auctionator"
+local NONE = "none"
+
+-- The price source item values come from: "auctionator" or "none", then,
+-- when it is None only because Auctionator is not loaded, the reason. The
+-- choice is kept in saved state (account-wide); with no choice made it is
+-- Auctionator whenever Auctionator is loaded.
+function Tracker:priceSource()
+  if self.saved.priceSource == NONE then
+    return NONE
+  elseif self.priceSources[AUCTIONATOR] then
+    return AUCTIONATOR
+  end
+  return NONE, "Auctionator is not loaded."
+end
+
+-- Keeps the price source choice, "auctionator" or "none", in saved state.
+-- Item values follow it at the next refresh.
+function Tracker:setPriceSource(name)
+  self.saved.priceSource = name
+  return true
+end
+
+-- What valuing an item reads: the item facts port and the chosen price
+-- source's port, nil for None.
+function Tracker:valuationPorts()
+  return {
+    itemFacts = self.ports.itemFacts,
+    priceSource = self.priceSources[self:priceSource()],
+  }
 end
 
 -- The current session if it is counting loot, else nil.
@@ -126,7 +163,7 @@ function Tracker:stop()
   if not session then
     return nil, "There is no session to stop."
   end
-  ns.Items.refresh(session, self.ports)
+  ns.Items.refresh(session, self:valuationPorts())
   local figures = figuresOf(session, self.ports.clock.now())
   figures.items = session.items or {}
   self:setCurrentSession(nil)
@@ -180,7 +217,7 @@ function Tracker:chatLine(kind, text)
   elseif kind == "loot" then
     local link, quantity = self.lines:ownDrop(text)
     if link then
-      ns.Items.add(session, link, quantity, self.ports)
+      ns.Items.add(session, link, quantity, self:valuationPorts())
     end
   end
 end
@@ -200,7 +237,7 @@ end
 function Tracker:refresh()
   local session = self:currentSession()
   if session then
-    ns.Items.refresh(session, self.ports)
+    ns.Items.refresh(session, self:valuationPorts())
   end
 end
 
