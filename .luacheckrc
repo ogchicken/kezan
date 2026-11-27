@@ -10,6 +10,7 @@ stds.wow = {
     "SLASH_KEZAN2",
   },
   read_globals = {
+    "Auctionator",
     "C_AddOns",
     "C_Item",
     "COPPER_AMOUNT",
