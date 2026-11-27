@@ -18,6 +18,16 @@ ns.addCommand("start", "start a session", function()
   ns.print(ok and "Session started." or reason)
 end)
 
+ns.addCommand("pause", "pause the session; loot while paused doesn't count", function()
+  local ok, reason = ns.tracker:pause()
+  ns.print(ok and "Session paused." or reason)
+end)
+
+ns.addCommand("resume", "resume the paused session", function()
+  local ok, reason = ns.tracker:resume()
+  ns.print(ok and "Session resumed." or reason)
+end)
+
 ns.addCommand("stop", "stop the session and print what it earned", function()
   local stopped, reason = ns.tracker:stop()
   if not stopped then
