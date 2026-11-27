@@ -8,4 +8,5 @@
 ## X-License: MIT
 ## X-Website: https://github.com/ogchicken/kezan
 
+Core\Tracker.lua
 Kezan.lua
