@@ -3,16 +3,24 @@
 
 local support = {}
 
--- The enUS values of the client's own loot and coin format strings.
+-- The enUS values of the client's own loot and coin format strings on
+-- Forever (research/2026-11-27-loot-and-money-events.md, section 3).
 support.enUSLootStrings = {
-  LOOT_ITEM_SELF = "You receive loot: %s.",
-  LOOT_ITEM_SELF_MULTIPLE = "You receive loot: %sx%d.",
+  LOOT_ITEM_SELF = "You receive loot: %s",
+  LOOT_ITEM_SELF_MULTIPLE = "You receive loot: %sx%d",
   YOU_LOOT_MONEY = "You loot %s",
   LOOT_MONEY_SPLIT = "Your share of the loot is %s.",
   GOLD_AMOUNT = "%d Gold",
   SILVER_AMOUNT = "%d Silver",
   COPPER_AMOUNT = "%d Copper",
 }
+
+-- An item link as the client puts it in a chat line, such as
+-- "|cffffffff|Hitem:2447::::::::60:::::::::|h[Peacebloom]|h|r". `color`
+-- is the quality colour without "|c"; white when left out.
+function support.itemLink(itemID, name, color)
+  return ("|c%s|Hitem:%d::::::::60:::::::::|h[%s]|h|r"):format(color or "ffffffff", itemID, name)
+end
 
 -- Loads every session-core file listed in Kezan.toc, in TOC order, into a
 -- fresh namespace, as the client does with `local addonName, ns = ...`.

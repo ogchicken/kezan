@@ -42,3 +42,20 @@ describe("the current session in saved state", function()
     }):frameFigures().state)
   end)
 end)
+
+describe("looted items in saved state", function()
+  it("are found again, with their values, by a tracker built later", function()
+    local savedState = {}
+    local linen = support.itemLink(2589, "Linen Cloth")
+    local itemFacts = support.fakeItemFacts({
+      [linen] = { itemID = 2589, quality = 1, soulbound = false, vendorValue = 13 },
+    })
+    local first = support.newTracker({ savedState = savedState, itemFacts = itemFacts })
+    first:start()
+    first:chatLine("loot", "You receive loot: " .. linen .. "x3")
+
+    local later = support.newTracker({ savedState = savedState, itemFacts = support.fakeItemFacts() })
+
+    assert.are.equal(39, later:frameFigures().lootedItemValue)
+  end)
+end)
