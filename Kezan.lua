@@ -86,8 +86,8 @@ ns.on("ADDON_LOADED", function(loadedName)
 end)
 
 -- Slash commands. ns.addCommand(name, summary, run) adds `/kz <name>`;
--- run gets the rest of the line. `/kz` alone prints the version and the
--- commands, in the order they were added.
+-- run takes no argument. `/kz` alone prints the version and the commands,
+-- in the order they were added.
 local commands = {}
 
 function ns.addCommand(name, summary, run)
@@ -104,7 +104,7 @@ end
 SLASH_KEZAN1 = "/kezan"
 SLASH_KEZAN2 = "/kz"
 SlashCmdList.KEZAN = function(message)
-  local name, rest = message:match("^%s*(%S*)%s*(.-)%s*$")
+  local name = message:match("^%s*(%S*)")
   name = name:lower()
   if name == "" then
     printHelp()
@@ -113,7 +113,7 @@ SlashCmdList.KEZAN = function(message)
   for _, command in ipairs(commands) do
     if command.name == name then
       if ns.tracker then
-        command.run(rest)
+        command.run()
       end
       return
     end

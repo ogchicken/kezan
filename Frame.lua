@@ -44,7 +44,7 @@ local ROWS = {
 
 -- KezanDB.frame: { shown, point, relativePoint, x, y }. An optional table,
 -- filled with defaults on first use; no schema change.
-local function settings()
+local function frameLayout()
   local saved = ns.db.frame
   if not saved then
     saved = { shown = true }
@@ -116,7 +116,7 @@ end
 
 local function savePosition()
   local point, _, relativePoint, x, y = frame:GetPoint()
-  local saved = settings()
+  local saved = frameLayout()
   saved.point, saved.relativePoint, saved.x, saved.y = point, relativePoint, x, y
 end
 
@@ -187,7 +187,7 @@ local function build()
   end)
   frame:SetScript("OnShow", update)
 
-  local saved = settings()
+  local saved = frameLayout()
   frame:SetPoint(saved.point, UIParent, saved.relativePoint, saved.x, saved.y)
   frame:Hide()
 end
@@ -195,7 +195,7 @@ end
 -- The one way to show or hide the frame, for /kz show and hide and the
 -- settings toggle. The choice is saved. Call it after ADDON_LOADED.
 function ns.setFrameShown(shown)
-  settings().shown = shown and true or false
+  frameLayout().shown = shown and true or false
   if frame then
     frame:SetShown(shown)
   end
@@ -203,7 +203,7 @@ end
 
 -- Whether the frame is set to be shown. Call it after ADDON_LOADED.
 function ns.isFrameShown()
-  return settings().shown
+  return frameLayout().shown
 end
 
 ns.on("ADDON_LOADED", function(loadedName)
