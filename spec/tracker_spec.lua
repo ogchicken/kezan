@@ -1,7 +1,7 @@
 local support = require("spec.support.tracker")
 
 describe("a tracker with no session", function()
-  it("shows zero figures and the state none", function()
+  it("shows zero figures and the state none, and offers Start", function()
     local tracker = support.newTracker()
 
     assert.are.same({
@@ -12,6 +12,7 @@ describe("a tracker with no session", function()
       total = 0,
       gph = 0,
       unreadableLines = 0,
+      commands = { "start" },
     }, tracker:frameFigures())
   end)
 end)
