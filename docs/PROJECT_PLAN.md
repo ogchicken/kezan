@@ -35,6 +35,8 @@ In order of preference, chosen per player in settings:
 
 An item with no AH value falls back to the next source and is marked as such in the display. Both price addons are optional (ADR 0001). TSM's public data terms ask for credit and a link when its prices are shown.
 
+Milestone 1 supports Auctionator and the vendor price; TradeSkillMaster follows later. Decided on 27 November 2026: the owner plays with Auctionator, so it is the source that can be tested in game, and which TSM price sources hold data on Forever is still unverified (section 6). The price lookup keeps each source behind one interface, so TSM arrives as one more source rather than a rewrite.
+
 ## 5. Milestones
 
 ### Milestone 1: gold-per-hour tracker
@@ -44,14 +46,14 @@ An item with no AH value falls back to the next source and is marked as such in 
 | Session start, stop, pause and resume | Duration excludes paused time; state survives `/reload`. |
 | Raw gold tracking | Matches the change in `GetMoney()` from looting over a test session, excluding vendor sales, mail and trades. |
 | Looted items | Every looted item and quantity is recorded from the loot events, including items whose info loads late. |
-| Price lookup | Values come from the chosen source with fallback; a missing Auctionator or TSM causes no Lua error. |
+| Price lookup | Values come from Auctionator with the vendor price as fallback; a missing Auctionator causes no Lua error. |
 | GPH display | A small movable frame shows duration, raw gold, item value, total and gold per hour, updating at least every 5 seconds. |
 | Session summary | On stop, a summary lists the top items by value; the last sessions are kept in `KezanDB`. |
-| Settings | A `Settings` panel chooses the price source and TSM price string and toggles the frame. |
+| Settings | A `Settings` panel chooses the price source and toggles the frame. |
 
 ### Later (unordered)
 
-Session history and per-zone comparison; a LibDataBroker feed; tooltip values; vendor-trash auto-sell; mail and AH sales accounting; profit tracking across characters; crafting and flipping helpers.
+TradeSkillMaster as a price source, with a chosen price string; session history and per-zone comparison; a LibDataBroker feed; tooltip values; vendor-trash auto-sell; mail and AH sales accounting; profit tracking across characters; crafting and flipping helpers.
 
 ## 6. Open questions
 
@@ -59,5 +61,5 @@ Desk research of 27 November 2026 (`research/2026-11-27-loot-and-money-events.md
 
 1. **Loot and money data: answered on paper, confirm in game.** Forever's API documentation makes `CHAT_MSG_SYSTEM` and 46 other chat events secret in dungeons, raids, encounters, keystones and PvP matches, but not `CHAT_MSG_LOOT` or `CHAT_MSG_MONEY`; `GetMoney()`, `PLAYER_MONEY` and the `LOOT_*` events carry no secret tag. To confirm in game, solo and in a group dungeon: the text arrives readable; its exact wording; which payload fields, if any, name the looter; whether a won roll gives one "You receive loot" line or two; and that nothing changes with the `addon*RestrictionsForced` CVars set. If the chat events turn out secret after all, the fallback is diffing `GetMoney()` and bag contents. Quest money arrives on `CHAT_MSG_SYSTEM`, so it is secret in dungeons either way.
 2. **Plain TOC: answered.** A single `Kezan.toc` with `## Interface: 16001` loads on Forever without an "out of date" warning; ForeverPlusPlus confirmed it in the live client and most Forever addons ship that way. Confirm when Kezan first loads in game.
-3. **TSM price sources: open.** TSM publishes region data for Forever (US and EU); whether the realm sources (`DBMarket`, `DBMinBuyout`, `DBHistorical`, `DBRecent`) hold values is unverified. Check before the price lookup ticket.
+3. **TSM price sources: open, deferred with TSM support.** TSM publishes region data for Forever (US and EU); whether the realm sources (`DBMarket`, `DBMinBuyout`, `DBHistorical`, `DBRecent`) hold values is unverified. Check before TSM support is built.
 4. **`/kz`: answered, low risk.** No Blizzard command and no Forever addon found uses it; `/kezan` stays registered as well. Check `SlashCmdList` with popular addons loaded.
