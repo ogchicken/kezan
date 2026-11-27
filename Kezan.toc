@@ -20,3 +20,4 @@ AuctionatorPrices.lua
 OpenedItems.lua
 Commands.lua
 Frame.lua
+Settings.lua

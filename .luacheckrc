@@ -31,6 +31,7 @@ stds.wow = {
     "LOOT_ITEM_SELF_MULTIPLE",
     "LOOT_MONEY_SPLIT",
     "NUM_TOTAL_EQUIPPED_BAG_SLOTS",
+    "Settings",
     "SILVER_AMOUNT",
     "time",
     "UIParent",
