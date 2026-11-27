@@ -1,6 +1,6 @@
 # Coding standards
 
-Read at review time. The first checks come from the platform research of 27 November 2026 (`research/2026-11-27-name-and-platform.md`); lint and tests will enforce what they can once the toolchain exists. Add a check here when a defect passes every automated check.
+Read at review time. luacheck (`.luacheckrc`) and busted (`spec/`) run on every pull request and enforce what they can, including that a session-core file reads no WoW global; the checks below are what a reviewer still reads for. The first came from the platform research of 27 November 2026 (`research/2026-11-27-name-and-platform.md`). Add a check here when a defect passes every automated check.
 
 ## Modern API only
 
