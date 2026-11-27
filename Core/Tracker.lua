@@ -44,16 +44,17 @@ local AUCTIONATOR = "auctionator"
 local NONE = "none"
 
 -- The price source item values come from: "auctionator" or "none", then,
--- when it is None only because Auctionator is not loaded, the reason. The
--- choice is kept in saved state (account-wide); with no choice made it is
--- Auctionator whenever Auctionator is loaded.
+-- whenever Auctionator is not loaded, the reason, so that the settings
+-- panel can say why Auctionator can't be chosen. The choice is kept in
+-- saved state (account-wide); with no choice made it is Auctionator
+-- whenever Auctionator is loaded.
 function Tracker:priceSource()
-  if self.saved.priceSource == NONE then
+  if not self.priceSources[AUCTIONATOR] then
+    return NONE, "Auctionator is not loaded."
+  elseif self.saved.priceSource == NONE then
     return NONE
-  elseif self.priceSources[AUCTIONATOR] then
-    return AUCTIONATOR
   end
-  return NONE, "Auctionator is not loaded."
+  return AUCTIONATOR
 end
 
 -- Keeps the price source choice, "auctionator" or "none", in saved state.

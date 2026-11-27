@@ -200,3 +200,48 @@ describe("the price source choice", function()
     assert.are.equal(250, later:frameFigures().lootedItemValue)
   end)
 end)
+
+describe("the price source the settings panel shows", function()
+  local function silkFacts()
+    return support.fakeItemFacts({
+      [SILK] = { itemID = 4306, quality = 1, soulbound = false, vendorValue = 37 },
+    })
+  end
+
+  it("is None with the reason when Auctionator is not loaded, even after None was chosen", function()
+    local savedState = { priceSource = "none" }
+    local tracker = support.newTracker({ itemFacts = silkFacts(), priceSources = {}, savedState = savedState })
+
+    assert.are.same({ "none", "Auctionator is not loaded." }, { tracker:priceSource() })
+  end)
+
+  it("gives vendor values from the next refresh once None is chosen with Auctionator loaded", function()
+    local tracker = support.newTracker({
+      itemFacts = silkFacts(),
+      priceSources = { auctionator = support.fakePriceSource({ [SILK] = { copper = 250, ageDays = 0 } }) },
+    })
+    tracker:start()
+    tracker:chatLine("loot", "You receive loot: " .. SILK .. "x2")
+    assert.are.equal(500, tracker:frameFigures().lootedItemValue)
+
+    tracker:setPriceSource("none")
+    assert.are.same({ "none" }, { tracker:priceSource() })
+    assert.are.equal(500, tracker:frameFigures().lootedItemValue)
+    tracker:refresh()
+
+    assert.are.equal(74, tracker:frameFigures().lootedItemValue)
+    assert.are.same({ quantity = 2, itemValue = 37, pricing = "vendor" }, tracker:stop().items[SILK])
+  end)
+
+  it("gives vendor values to loot that arrives after None is chosen", function()
+    local tracker = support.newTracker({
+      itemFacts = silkFacts(),
+      priceSources = { auctionator = support.fakePriceSource({ [SILK] = { copper = 250, ageDays = 0 } }) },
+    })
+    tracker:setPriceSource("none")
+    tracker:start()
+    tracker:chatLine("loot", "You receive loot: " .. SILK)
+
+    assert.are.same({ quantity = 1, itemValue = 37, pricing = "vendor" }, tracker:stop().items[SILK])
+  end)
+end)
