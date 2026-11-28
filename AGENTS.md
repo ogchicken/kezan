@@ -29,7 +29,7 @@ Read the section a task touches before writing a spec, a ticket or code:
 
 Kezan targets World of Warcraft: Forever (patch 1.60.1, `## Interface: 16001`), which runs the modern Mainline API. Use `C_Container`, `C_Item`, `C_AddOns` and the `Settings` API; the old globals such as `GetItemInfo` and `GetContainerItemInfo` do not exist there. Registering an event the client does not have raises an error, and `COMBAT_LOG_EVENT_UNFILTERED` never fires for addons.
 
-Nothing here can be run outside the game client. A change that touches game behaviour states in its pull request what was checked in game and on which build.
+The session core (`Core/`) is plain Lua 5.1 that runs outside the game under busted and is linted by luacheck (ADR 0003). Run `busted` and `luacheck .` before pushing; the README says how to install them. The in-game layer and the UI run only in the client: a change to either states in its pull request what was checked in game and on which build.
 
 ### Milestone 1: in-game checks deferred
 

@@ -1,0 +1,102 @@
+local support = require("spec.support.tracker")
+
+describe("pausing and resuming a session", function()
+  it("leaves paused time out of active time", function()
+    local clock = support.fakeClock(0)
+    local tracker = support.newTracker({ clock = clock })
+    tracker:start()
+    tracker:chatLine("coin", "You loot 5 Gold")
+    clock.set(600)
+    assert.is_true(tracker:pause())
+    clock.set(900)
+    assert.are.equal("paused", tracker:frameFigures().state)
+    assert.are.equal(600, tracker:frameFigures().activeTime)
+    assert.is_true(tracker:resume())
+    clock.set(1800)
+
+    local figures = tracker:frameFigures()
+
+    assert.are.equal("running", figures.state)
+    assert.are.equal(1500, figures.activeTime)
+    assert.are.equal(50000, figures.rawGold)
+    assert.are.equal(120000, figures.gph)
+  end)
+end)
+
+describe("loot while a session is paused", function()
+  it("does not count coin or unreadable lines that arrive while paused", function()
+    local tracker = support.newTracker()
+    tracker:start()
+    tracker:chatLine("coin", "You loot 2 Silver")
+    tracker:pause()
+    tracker:chatLine("coin", "You loot 7 Gold")
+    tracker:unreadableLine()
+    tracker:resume()
+    tracker:chatLine("coin", "You loot 3 Copper")
+
+    local figures = tracker:frameFigures()
+
+    assert.are.equal(203, figures.rawGold)
+    assert.are.equal(0, figures.unreadableLines)
+  end)
+end)
+
+describe("pause, resume and start where they don't apply", function()
+  local function refused(tracker, command)
+    local ok, reason = tracker[command](tracker)
+    assert.is_nil(ok)
+    return reason
+  end
+
+  it("refuses to pause or resume with no session", function()
+    local tracker = support.newTracker()
+
+    assert.are.equal("There is no session to pause.", refused(tracker, "pause"))
+    assert.are.equal("There is no session to resume.", refused(tracker, "resume"))
+    assert.are.equal("none", tracker:frameFigures().state)
+  end)
+
+  it("refuses to pause a paused session or resume a running one", function()
+    local clock = support.fakeClock(0)
+    local tracker = support.newTracker({ clock = clock })
+    tracker:start()
+    clock.set(100)
+
+    assert.are.equal("The session is already running.", refused(tracker, "resume"))
+    tracker:pause()
+    clock.set(400)
+    assert.are.equal("The session is already paused.", refused(tracker, "pause"))
+
+    local figures = tracker:frameFigures()
+    assert.are.equal("paused", figures.state)
+    assert.are.equal(100, figures.activeTime)
+  end)
+
+  it("refuses to start a new session while one is paused", function()
+    local tracker = support.newTracker()
+    tracker:start()
+    tracker:chatLine("coin", "You loot 4 Silver")
+    tracker:pause()
+
+    assert.are.equal("A session is already paused. Resume or stop it first.", refused(tracker, "start"))
+    assert.are.equal("paused", tracker:frameFigures().state)
+    assert.are.equal(400, tracker:frameFigures().rawGold)
+  end)
+
+  it("stops a paused session and reports what it earned", function()
+    local clock = support.fakeClock(0)
+    local tracker = support.newTracker({ clock = clock })
+    tracker:start()
+    tracker:chatLine("coin", "You loot 1 Gold")
+    clock.set(1800)
+    tracker:pause()
+    clock.set(5000)
+
+    local stopped = tracker:stop()
+
+    assert.are.equal("paused", stopped.state)
+    assert.are.equal(1800, stopped.activeTime)
+    assert.are.equal(20000, stopped.gph)
+    assert.are.equal("none", tracker:frameFigures().state)
+  end)
+end)

@@ -45,6 +45,15 @@ The sum over a session's drops of quantity times item value.
 **gold per hour (GPH)**:
 (Raw gold + looted item value) divided by the session's active time in hours. Gross: repairs, reagents and other spending are not subtracted.
 
+**start zone**:
+The zone a session started in, by the client's zone name; inside an instance, the instance. A session keeps it even when the player moves on.
+
+**summary**:
+What a stopped session earned: its figures and its top 10 items by value, each with how it was priced.
+
+**history**:
+Every stopped session, kept with its character and every item, its item values frozen at stop.
+
 ### Items and prices
 
 **soulbound**:
