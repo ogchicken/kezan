@@ -32,7 +32,7 @@ To remove the link, run `cmd /c rmdir "C:\Program Files (x86)\World of Warcraft\
 
 ## Tests and lint
 
-The session core (`Core/`) is plain Lua 5.1 that runs outside the game ([ADR 0003](docs/adr/0003-session-logic-is-plain-lua-tested-with-busted.md)). busted runs its tests in `spec/`, and luacheck lints every file; a session-core file that reads a WoW global fails the lint. CI runs both on every pull request.
+The session core (`Core/`) is plain Lua 5.1 that runs outside the game ([ADR 0003](docs/adr/0003-session-logic-is-plain-lua-tested-with-busted.md)). busted runs its tests in `spec/`, and luacheck lints every file; a session-core file that reads a WoW global fails the lint. CI runs both on every pull request and on every push to `main`.
 
 Run both from the repository root:
 
@@ -90,7 +90,7 @@ Chat.lua                 in-game layer: chat-event adapters
 Commands.lua             in-game layer: the /kz session commands
 spec/                    busted tests of the session core, and their fakes
 .luacheckrc              lint rules, including the session core's
-.github/workflows/       CI: luacheck and busted on every pull request
+.github/workflows/       CI: luacheck and busted on every pull request and push to main
 AGENTS.md, CLAUDE.md     instructions for coding agents
 CODING_STANDARDS.md      review checks
 GLOSSARY.md              domain terms
